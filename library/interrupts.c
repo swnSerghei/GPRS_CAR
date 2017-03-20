@@ -6,21 +6,14 @@
  */
 #include "interrupts.h"
 
-#pragma vector=TIMER1_A1_VECTOR	//timer 1
-__interrupt void Timer_A1 (void)
+#pragma vector=TIMER0_A0_VECTOR	//timer
+__interrupt void Timer_A0 (void)
 {
-	switch(TA1IV)
+	static uint8 tmpCounter=0;
+	tmpCounter++;
+	if ( tmpCounter == 10 )
 	{
-	 case 2:	// CCR1
-	 break;
-	 case 4:	// CCR2
-	 break;
-	 case 10: 	Flag33msOcured = true;// overflow ? reserved
-	 break;
-	 case 14: 	// overflow ?
-	 break;
-	 default:	//default :)
-	 break;
+	    tmpCounter = 0; task1s();
 	}
  	__enable_interrupt();
 }

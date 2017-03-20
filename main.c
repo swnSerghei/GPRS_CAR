@@ -4,16 +4,18 @@
 #include "library/interrupts.h"
 #include "library/commontypes.h"
 #include "library/system.h"
+#define debugMode 0
 /*
  * main.c
  */
+
 void main(void)
 {
     watchDogConfigure();
     configureFrequency();
     Init_Uart();
-    putInUartBuffer("hello world\n");
-    sendUartBuffer();
+    initTimerOnlyOnPowerOn();
+    go_to_sleep();
     __enable_interrupt();
 while(1)
     {
