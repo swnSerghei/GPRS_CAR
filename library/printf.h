@@ -8,7 +8,7 @@
 #ifndef LIBRARY_PRINTF_H_
 #define LIBRARY_PRINTF_H_
 #include "commontypes.h"
-void putInUartBuffer(uint8 *string, ... );
+void print(uint8 *string, ... );
 //uint32 _power( uint32 val, uint32 _pow );
-
+//#define debugMode 0
 #endif /* LIBRARY_PRINTF_H_ */

@@ -9,11 +9,11 @@
 #define INTERRUPTS_H_
 
 #include "commontypes.h"
-#include <msp430.h>
+#include <msp430g2955.h>
 #include "timer.h"
-#include "task.h"
 #include "uart.h"
-
-bool mS100Ocured;
-
+#include "key.h"
+#include "task.h"
+#include "printf.h"
+bool interruptByKey1_treated;
 #endif /* INTERRUPTS_H_ */

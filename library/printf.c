@@ -9,7 +9,7 @@
 #include "commontypes.h"
 #include "uart.h"
 #include "printf.h"
-void putInUartBuffer(uint8 *string, ... )
+void print(uint8 *string, ... )
 {
 	 va_list vl;
 	 uint8 i;	//parsing the string
@@ -45,11 +45,11 @@ void putInUartBuffer(uint8 *string, ... )
 				{
 					if (countIntegerNumber == 1)
 					{
-					    Uart_RecalculateTail_Buffer( (uint8)Printable.i+48 );
+					    putInUartBuffer( (uint8)Printable.i+48 );
 					} //in case if only 1 digit
 					else
 					{
-					    Uart_RecalculateTail_Buffer( (Printable.i / powValue)+48 );
+					    putInUartBuffer( (Printable.i / powValue)+48 );
 					Printable.i %= powValue;
 					powValue/=10;
 					}
@@ -70,11 +70,11 @@ void putInUartBuffer(uint8 *string, ... )
 				{
 					if (countIntegerNumber == 1)
 					{
-					    Uart_RecalculateTail_Buffer( (uint8)tmpValue+48 );
+					    putInUartBuffer( (uint8)tmpValue+48 );
 					} //in case if only 1 digit
 					else
 					{
-                        Uart_RecalculateTail_Buffer( (tmpValue / powValue)+48 );
+					    putInUartBuffer( (tmpValue / powValue)+48 );
                         tmpValue %= powValue;
                         powValue/=10;
 					}
@@ -83,15 +83,15 @@ void putInUartBuffer(uint8 *string, ... )
 				tmpValue = (uint32)Printable.f * 100;
 				Printable.f *= 100;
 				tmpValue = (uint32)Printable.f%tmpValue;
-				Uart_RecalculateTail_Buffer( '.' );
-				Uart_RecalculateTail_Buffer ( (tmpValue / 10)+48 );
-				Uart_RecalculateTail_Buffer( (tmpValue % 10)+48 );
+				putInUartBuffer( '.' );
+				putInUartBuffer ( (tmpValue / 10)+48 );
+				putInUartBuffer( (tmpValue % 10)+48 );
 				 //printf_s( "%f\n", Printable.f );
 			 break;
 
 			 case 'c':
 				 Printable.c = va_arg( vl, char );
-				 Uart_RecalculateTail_Buffer( (uint8)Printable.c );
+				 putInUartBuffer( (uint8)Printable.c );
 				 //printf_s( "%c\n", Printable.c );
 			 break;
 
@@ -101,8 +101,8 @@ void putInUartBuffer(uint8 *string, ... )
 			 break;
 			 default:
 			 {
-				 Uart_RecalculateTail_Buffer(string[i]);
-				 Uart_RecalculateTail_Buffer(string[i+1]);
+			     putInUartBuffer(string[i]);
+			     putInUartBuffer(string[i+1]);
 			 }
 			 break;
 	 		 }
@@ -110,7 +110,7 @@ void putInUartBuffer(uint8 *string, ... )
 	 	 }
 		 else
 		 {
-		     Uart_RecalculateTail_Buffer(string[i]);
+		     putInUartBuffer(string[i]);
 		 }
 	 }
 }

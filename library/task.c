@@ -5,34 +5,30 @@
  *      Author: Serghei
  */
 #include "task.h"
+
 void task1s()
 {
-    seconds++;
-    if (seconds == 40 && wakeUpReason == 0)//wakeup and read message f present any command
-    {
-        wakeUpReason = wakeUpByTimer; wakeUp();
-    }
-    if (seconds == 60)
-    {
-        seconds=0;minutes++;
-        if (wakeUpReason == wakeUpByTimer) go_to_sleep();
-    }
-    if (minutes == 60)
-    {
-        minutes=0;hours++;
-    }
+}
+void task100ms()
+{
+
 }
 void go_to_sleep()
 {
-    #ifdef debugMode
-    putInUartBuffer("GO in sleep Mode\n");
-    sendUartBuffer();
-    __delay_cycles(100000);
-    #endif
-    wakeUpReason = sleepMode;
-    _BIS_SR(LPM1_bits + GIE); // Enter LPM3 w/interrupt
+    TxBuffer_Uart_Head = 0;
+    TxBuffer_Uart_Tail = 0;
+    gprs_second = 0;
+    gprs_minuts = 0;
+    wakeupTimer = 0;
+    interruptByKey1_treated = true;
+    gprs_state_machine = GPRS_SLEEP;
+    uninit_uart();
+    LPM1; // Enter LPM1 w/interrupt
 }
 void wakeUp()
 {
-    __bic_SR_register(LPM3_bits); // exits LPM3
+    PresentAnyCommand = 0;
+    retryersToStartEngine = 0;
+    Init_Uart();
+    // exits LPM3
 }

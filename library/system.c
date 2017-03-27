@@ -44,5 +44,5 @@ void configureFrequency()
       //WatchDogTask();
       //P3OUT ^= BIT6;
       //_BIC_SR(LPM3_EXIT); // wake up from low power mode
-      //IE1 &= !WDTIE;                         // enable Watchdog timer interrupts
+      //IE1 &= ~WDTIE;                         // enable Watchdog timer interrupts
 }

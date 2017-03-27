@@ -8,9 +8,9 @@
 void initTimerOnlyOnPowerOn()
 {
     seconds = 0;
-    minutes = 0;
+    minuts = 0;
     hours   = 0;
-    TA0CCR0  = 0xAFFF;                        //need to calibrate for 100ms
-    TA0CTL  = TASSEL_2 + ID_3 + MC_1;
-    TA0CCTL0 = CCIE;
+    TA1CCR0  = 0xC035;                        //need to calibrate for 100ms
+    TA1CTL  = TASSEL_2 + ID_3 + MC_1;
+    TA1CCTL0 = CCIE;
 }

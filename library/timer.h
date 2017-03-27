@@ -12,7 +12,9 @@
 void initTimerOnlyOnPowerOn();
 
 uint8 seconds;
-uint8 minutes;
+uint8 minuts;
 uint16 hours;
+uint8 wakeupTimer;
+uint8 whaitTimer;
 
 #endif /* LIBRARY_TIMER_H_ */
