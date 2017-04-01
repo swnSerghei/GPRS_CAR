@@ -11,15 +11,24 @@ void parkingLightInit()
 }
 void activateparkingLight()
 {
-    P4OUT |= parkingLightPin;
-    StateOfCommands |= ((uint32)1<<parkigLight_start);
-    counterExecutedCommands++;
-    print("parkigLight_start\r\n");
+    if ( !(StateOfCommands & ((uint32)1<<parkigLight_start)))
+    {
+        P4OUT |= parkingLightPin;
+        counter_StayActive_ParckingLight = 0;
+        StateOfCommands |= ((uint32)1<<parkigLight_start);
+
+        //print("parkigLight_start\r\n");
+    }
+    else counterExecutedCommands++;
 }
 void deactivateparkingLight()
 {
-    P4OUT &= ~parkingLightPin;
-    StateOfCommands &= ~((uint32)1<<parkigLight_start);
-    counterExecutedCommands++;
-    print("parkigLight_stop\r\n");
+    if (StateOfCommands & ((uint32)1<<parkigLight_start))
+    {
+        P4OUT &= ~parkingLightPin;
+        StateOfCommands &= ~((uint32)1<<parkigLight_start);
+        counterExecutedCommands++;
+        //print("parkigLight_stop\r\n");
+    }
+    else counterExecutedCommands++;
 }

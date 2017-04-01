@@ -15,5 +15,8 @@
 #include "key.h"
 #include "task.h"
 #include "printf.h"
-bool interruptByKey1_treated;
+#include "panel.h"
+#include "GPRS.h"
+#include "parkingLight.h"
+bool interruptByKey2_treated;
 #endif /* INTERRUPTS_H_ */

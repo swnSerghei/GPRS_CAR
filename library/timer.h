@@ -9,8 +9,9 @@
 #define LIBRARY_TIMER_H_
 #include "commontypes.h"
 #include <msp430g2955.h>
-void initTimerOnlyOnPowerOn();
 
+void initTimerOnlyOnPowerOn();
+uint32 timerRegisterOnLearning;
 uint8 seconds;
 uint8 minuts;
 uint16 hours;

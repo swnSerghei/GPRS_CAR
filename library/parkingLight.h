@@ -12,6 +12,8 @@
 #include "GPRS.h"
 
 #define parkingLightPin BIT7
+#define StayActive_ParckingLight 360    //6h - 6 * 60
+uint16 counter_StayActive_ParckingLight;
 
 void parkingLightInit();
 void activateparkingLight();

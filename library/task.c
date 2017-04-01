@@ -15,19 +15,25 @@ void task100ms()
 }
 void go_to_sleep()
 {
+    StateOfCommands &= ~((uint32)1<<ac_start);
+    StateOfCommands &= ~((uint32)1<<luneta_start);
+    StateOfCommands &= ~((uint32)1<<parbriz_start);
+    StateOfCommands &= ~((uint32)1<<recirculare_start);
+    TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN;
     TxBuffer_Uart_Head = 0;
     TxBuffer_Uart_Tail = 0;
     gprs_second = 0;
     gprs_minuts = 0;
     wakeupTimer = 0;
-    interruptByKey1_treated = true;
+    interruptByKey2_treated = true;
     gprs_state_machine = GPRS_SLEEP;
     uninit_uart();
     LPM1; // Enter LPM1 w/interrupt
 }
 void wakeUp()
 {
-    PresentAnyCommand = 0;
+    PresentAnyCommand = false;
+    allCommandsExecuted = true;
     retryersToStartEngine = 0;
     Init_Uart();
     // exits LPM3

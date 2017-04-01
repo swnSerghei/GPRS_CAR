@@ -56,10 +56,11 @@ uint8 gprs_state_machine;
 uint8 gprs_second;
 uint8 gprs_minuts;
 uint8 PresentAnyCommand;
+bool  allCommandsExecuted;
 uint8 counterExecutedCommands;
 uint8 listOfCommandsToExecuting[NrOfSMSComands];
 uint8 counterHowManyCommands;
-
+bool needToSendSMS;
 enum GPRS_commands
 {
     SMS=0,
