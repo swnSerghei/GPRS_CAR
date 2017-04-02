@@ -16,24 +16,20 @@
 #define luneta BIT6
 #define ventilator3 BIT0    //port3
 #define ventilator4 BIT2    //port3
-void activate_AC();
-void activate_recirculare();
-void activate_parbriz();
-void activate_luneta();
-void deactivate_AC();
-void deactivate_recirculare();
-void deactivate_parbriz();
-void deactivate_luneta();
-void ventilatorOff();
-void ventilator4poz();
-void ventilator3poz();
+void activateFromPanel(uint8 activateWhat);
+void deactivateFromPanel(uint8 deactivateWhat);
+void activateVentilator(uint8 ventilatoorPozition);
+void deactivateVentilator(uint8 ventilatoorPozition);
 void initPanel();
-uint8 waitPanelTimer;
-enum PanelStates
+
+enum ButtonPanelStates
 {
     buttonOff,
     buttonPress,
     buttonRelease
 };
+uint8 waitPanelTimer;
 uint8 buttonState;
+uint8 statesOfPannel;
+uint8 statesOfVentilator;
 #endif /* LIBRARY_PANEL_H_ */

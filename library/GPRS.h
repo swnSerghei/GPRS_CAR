@@ -30,8 +30,8 @@ enum gprs_state_machine
 };
 enum CommandsBits
 {
-    parkigLight_start=0,
-    parkigLight_stop,
+    parkingLight_start=0,
+    parkingLight_stop,
     key1_start,
     key1_stop,
     engine_start,

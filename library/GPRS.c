@@ -7,8 +7,8 @@
 #include "GPRS.h"
 const uint8 *SMSCommands[]=
 {
-    {"parkigLight start"},
-    {"parkigLight stop"},
+    {"parkingLight start"},
+    {"parkingLight stop"},
     {"key1 start"},
     {"key1 stop"},
     {"engine start"},

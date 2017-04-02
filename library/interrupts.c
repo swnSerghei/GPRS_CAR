@@ -63,14 +63,14 @@ __interrupt void Timer1_A1 (void)
         if (seconds == 60)
         {
             seconds=0;minuts++;
-            if (StateOfCommands & ((uint32)1<<parkigLight_start))
+            if (StateOfCommands & ((uint32)1<<parkingLight_start))
             {
                 counter_StayActive_ParckingLight++;
                 if (counter_StayActive_ParckingLight == StayActive_ParckingLight)
                 {
-                    StateOfCommands &= ~((uint32)1<<parkigLight_start);
+                    StateOfCommands &= ~((uint32)1<<parkingLight_start);
                     P4OUT &= ~parkingLightPin;
-                    //print("parkigLight_stop\r\n");
+                    //print("parkingLight_stop\r\n");
                 }
             }
             if (StateOfCommands & ((uint32)1<<engine_start))

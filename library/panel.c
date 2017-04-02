@@ -9,149 +9,86 @@ void initPanel()
 {
  P2DIR |= AC + recirculare + parbriz + luneta;
  P3DIR |= ventilator3 + ventilator4;
+ statesOfPannel = 0;
+ statesOfVentilator = 0;
  buttonState = buttonOff;
 }
-void activate_AC()
+void activateFromPanel(uint8 activateWhat)
 {
-    if ( StateOfCommands & ((uint32)1<<engine_start) && StateOfCommands & ((uint32)3<<ventilator_3pozitie) )
+    if ( (StateOfCommands & ((uint32)1<<engine_start)) )
     {
-        if ( StateOfCommands & ((uint32)1<<ac_start) ) { counterExecutedCommands++; buttonState = buttonOff;}
-        else if (buttonState == buttonOff) {P2OUT |= AC; buttonState = buttonPress; waitPanelTimer=0;
-        //print("ac_start\r\n");
-        }
-        else if ( waitPanelTimer > 5){P2OUT &= ~AC; buttonState = buttonOff; StateOfCommands |= ((uint32)1<<ac_start);counterExecutedCommands++;
-        //print("ac_started\r\n");
-        }
-    }
-    else { counterExecutedCommands++;
-    //print("engine not started or not activated any ventilator\r\n");
-    }
-}
-void deactivate_AC()
-{
-    if ( !(StateOfCommands & ((uint32)1<<ac_start)) ) { counterExecutedCommands++; buttonState = buttonOff; }
-    else if (buttonState == buttonOff) {P2OUT |= AC; buttonState = buttonPress; waitPanelTimer=0;
-    //print("ac_stop\r\n");
-    }
-    else if ( waitPanelTimer > 5){P2OUT &= ~AC; buttonState = buttonOff; StateOfCommands &= ~((uint32)1<<ac_start);counterExecutedCommands++;
-    //print("ac_stoped\r\n");
-    }
-}
-void activate_recirculare()
-{
-    if ( StateOfCommands & ((uint32)1<<engine_start) )
-    {
-        if ( StateOfCommands & ((uint32)1<<recirculare_start) ) { counterExecutedCommands++; buttonState = buttonOff; }
-        else if (buttonState == buttonOff) {P2OUT |= recirculare; buttonState = buttonPress; waitPanelTimer=0;
-        //print("recirculare_start\r\n");
-        }
-        else if ( waitPanelTimer > 5){P2OUT &= ~recirculare; buttonState = buttonOff; StateOfCommands |= ((uint32)1<<recirculare_start);counterExecutedCommands++;
-        //print("recirculare_started\r\n");
-        }
-    }
-    else { counterExecutedCommands++;
-    //print("engine not started\r\n");
-    }
-}
-void deactivate_recirculare()
-{
-    if ( !(StateOfCommands & ((uint32)1<<recirculare_start)) ) { counterExecutedCommands++; buttonState = buttonOff; }
-    else if (buttonState == buttonOff) {P2OUT |= recirculare; buttonState = buttonPress; waitPanelTimer=0;
-    //print("recirculare_stop\r\n");
-    }
-    else if ( waitPanelTimer > 5){P2OUT &= ~recirculare; buttonState = buttonOff; StateOfCommands &= ~((uint32)1<<recirculare_start);counterExecutedCommands++;
-    //print("recirculare_stoped\r\n");
-    }
-}
-void activate_parbriz()
-{
-    if ( StateOfCommands & ((uint32)1<<engine_start) )
-    {
-        if ( StateOfCommands & ~((uint32)1<<parbriz_start) ) { counterExecutedCommands++; buttonState = buttonOff; }
-        else if (buttonState == buttonOff) {P2OUT |= parbriz; buttonState = buttonPress; waitPanelTimer=0;
-        //print("parbriz_start\r\n");
-        }
-        else if (waitPanelTimer > 5)
+        switch ( activateWhat )
         {
-            P2OUT &= ~parbriz; buttonState = buttonOff; StateOfCommands |= ((uint32)1<<parbriz_start);counterExecutedCommands++;
-        //print("parbriz_started\r\n");
+            case AC:
+            {
+                if ( statesOfVentilator & (ventilator3 + ventilator4) )
+                {
+                    if ( statesOfPannel & AC ) { counterExecutedCommands++; buttonState = buttonOff;}
+                    else if (buttonState == buttonOff) {P2OUT |= AC; buttonState = buttonPress; waitPanelTimer=0;}
+                    else if ( waitPanelTimer > 5){P2OUT &= ~AC; buttonState = buttonOff; statesOfPannel |= AC;counterExecutedCommands++;}
+                }
+                else counterExecutedCommands++;//can't execute because ventilators is off
+                break;
+            }
+            default:
+            {
+                if ( statesOfPannel & activateWhat ) { counterExecutedCommands++; buttonState = buttonOff;}
+                else if (buttonState == buttonOff) {P2OUT |= activateWhat; buttonState = buttonPress; waitPanelTimer=0;}
+                else if ( waitPanelTimer > 5){P2OUT &= ~activateWhat; buttonState = buttonOff; statesOfPannel |= activateWhat;counterExecutedCommands++;}
+                break;
+            }
         }
     }
-    else
-    {
-        counterExecutedCommands++;
-    //print("engine not started\r\n");
-    }
+    else counterExecutedCommands++;//engine not start
 }
-void deactivate_parbriz()
+void deactivateFromPanel(uint8 deactivateWhat)
 {
-    if ( !(StateOfCommands & ~((uint32)1<<parbriz_start)) ) { counterExecutedCommands++; buttonState = buttonOff; }
-    else if (buttonState == buttonOff) {P2OUT |= parbriz; buttonState = buttonPress; waitPanelTimer=0;
-    //print("pabriz_stop\r\n");
-    }
-    else if ( waitPanelTimer > 5){P2OUT &= ~parbriz; buttonState = buttonOff; StateOfCommands &= ~((uint32)1<<parbriz_start);counterExecutedCommands++;
-    //print("pabriz_stoped\r\n");
-    }
-}
-void activate_luneta()
-{
-    if ( StateOfCommands & ((uint32)1<<engine_start) )
+    if ( (StateOfCommands & ((uint32)1<<engine_start)) )
     {
-        if ( StateOfCommands & ((uint32)1<<luneta_start) ) { counterExecutedCommands++; buttonState = buttonOff;
-        //print("luneta_is_allready_started\r\n");
-        }
-        else if (buttonState == buttonOff){P2OUT |= luneta; buttonState = buttonPress; waitPanelTimer=0;
-        //print("luneta_start button press\r\n");
-        }
-        else if ( waitPanelTimer > 5){P2OUT &= ~luneta;buttonState = buttonOff; StateOfCommands |= ((uint32)1<<luneta_start);counterExecutedCommands++;
-        //print("luneta_started\r\n");
+        switch ( deactivateWhat )
+        {
+            case AC:
+            {
+                if ( statesOfVentilator & (ventilator3 + ventilator4) )
+                {
+                    if ( statesOfPannel & AC ) { counterExecutedCommands++; buttonState = buttonOff;}
+                    else if (buttonState == buttonOff) {P2OUT |= AC; buttonState = buttonPress; waitPanelTimer=0;}
+                    else if ( waitPanelTimer > 5){P2OUT &= ~AC; buttonState = buttonOff; statesOfPannel |= AC;counterExecutedCommands++;}
+                }
+                else counterExecutedCommands++;//can't execute because ventilators is off
+            }
+            default:
+            {
+                if ( statesOfPannel & deactivateWhat ) { counterExecutedCommands++; buttonState = buttonOff;}
+                else if (buttonState == buttonOff) {P2OUT |= deactivateWhat; buttonState = buttonPress; waitPanelTimer=0;}
+                else if ( waitPanelTimer > 5){P2OUT &= ~deactivateWhat; buttonState = buttonOff; statesOfPannel &= ~deactivateWhat;counterExecutedCommands++;}
+            }
         }
     }
-    else
+    else //engine not start
     {
-        counterExecutedCommands++;
-    //print("engine not started\r\n");
+        statesOfPannel &= ~deactivateWhat; counterExecutedCommands++;
     }
 }
-void deactivate_luneta()
+void activateVentilator(uint8 ventilatoorPozition)
 {
-    if ( !(StateOfCommands & ((uint32)1<<luneta_start)) ) { counterExecutedCommands++; buttonState = buttonOff; }
-    else if (buttonState == buttonOff) {P2OUT |= luneta; buttonState = buttonPress; waitPanelTimer=0;
-    //print("luneta_stop\r\n");
-    }
-    else if ( waitPanelTimer > 5){P2OUT &= ~luneta; buttonState = buttonOff; StateOfCommands &= ~((uint32)1<<luneta_start);counterExecutedCommands++;
-    //print("luneta_stoped\r\n");
-    }
-}
-
-void ventilator3poz()
-{
-    if ( StateOfCommands & ((uint32)1<<engine_start) )
+    if ( (StateOfCommands & ((uint32)1<<engine_start)) )
     {
-        P3OUT |= ventilator3;P3OUT &= ~ventilator4;
-        StateOfCommands |= ((uint32)1<<ventilator_3pozitie);StateOfCommands &= ~((uint32)1<<ventilator_4pozitie);
-        //print("ventilator_3pozitie\r\n");
-        counterExecutedCommands++;
+        if ( statesOfVentilator & ventilatoorPozition ) counterExecutedCommands++;
+        else
+        {
+            P3OUT |= ventilatoorPozition;
+            statesOfVentilator |= ventilatoorPozition;
+            P3OUT &= ~(ventilator4+ventilator3-ventilatoorPozition);
+            statesOfVentilator &= ~(ventilator4+ventilator3-ventilatoorPozition);
+            counterExecutedCommands++;
+        }
     }
-
+    else counterExecutedCommands++;
 }
-void ventilator4poz()
+void deactivateVentilator(uint8 ventilatoorPozition)
 {
-    if ( StateOfCommands & ((uint32)1<<engine_start) )
-    {
-        P3OUT |= ventilator4;P3OUT &= ~ventilator3;
-        StateOfCommands |= ((uint32)(uint32)1<<ventilator_4pozitie);StateOfCommands &= ~((uint32)1<<ventilator_3pozitie);
-        //print("ventilator_4pozitie\r\n");
-        counterExecutedCommands++;
-    }
-    else { counterExecutedCommands++;
-    //print("engine not started\r\n");
-    }
-}
-void ventilatorOff()
-{
-    P3OUT &= ~(ventilator_3pozitie + ventilator_4pozitie);
-    StateOfCommands &= ~((uint32)3<<(ventilator_3pozitie));
-    //print("ventilator_off\r\n");
+    P3OUT &= ~ventilatoorPozition;
+    statesOfVentilator &= ~ventilatoorPozition;
     counterExecutedCommands++;
 }
