@@ -101,7 +101,7 @@ __interrupt void Timer1_A1 (void)
             {
                 systemState = sleepMode;
             }
-            else wakeupTimer--;
+            wakeupTimer--;
         }
         if ( KarStastes == motorStarted && systemState != wakeUpByKey2State && (!shifterState() || !parkingState()) )
         {
@@ -137,7 +137,6 @@ __interrupt void port1_isr(void)
             deactivateFromPanel(AC);deactivateFromPanel(recirculare);deactivateFromPanel(parbriz);deactivateFromPanel(luneta);
 
             if ( carLearn == Learn ) { TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN; }
-
 
             tmpCounterForCalculateKeyTime = 0;
             systemState = wakeUpByKey2State;

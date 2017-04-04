@@ -22,6 +22,7 @@ void go_to_sleep()
     gprs_minuts = 0;
     wakeupTimer = 0;
     gprs_state_machine = GPRS_SLEEP;
+    systemState = sleepMode;
     uninit_uart();
     LPM1; // Enter LPM1 w/interrupt
 }

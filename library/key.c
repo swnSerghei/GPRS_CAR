@@ -9,9 +9,10 @@
 
 void keyPosition_init()
 {
-    P1DIR |=    KEY1_ENABLE + KEY2_ENABLE + KEY3_ENABLE;
-    P1IES &=   ~(KEY2_DIAG + KEY3_DIAG);
-    P1IE   =    KEY2_DIAG + KEY3_DIAG;
+    P1DIR |=   KEY1_ENABLE + KEY2_ENABLE + KEY3_ENABLE;
+    P1IES &= ~(KEY2_DIAG + KEY3_DIAG);
+    P1IFG &= ~(KEY2_DIAG + KEY3_DIAG);
+    P1IE   =   KEY2_DIAG + KEY3_DIAG;
     carLearn = NotLearn;
     carLearnTimes = 0;
     timeBetween2Key_3Key = 0;
@@ -54,6 +55,7 @@ void reportMethod()
        print("panel:%d\r\n",statesOfPannel);
        putInUartBuffer(26);//ctrl+z
        wait_gprs_response("OK",10);
+       counterExecutedCommands++;
 }
 void startEngine()
 {

@@ -16,6 +16,7 @@
 void portsOFF();
 void main(void)
 {
+    uint8 tmpValue;
     portsOFF();
     watchDogConfigure();
     configureFrequency();
@@ -26,14 +27,14 @@ void main(void)
     initPanel();
     parkingLightInit();
     __enable_interrupt();
-    gprs_state_machine = GPRS_INIT;// for allow to go in sleep first time only
+    go_to_sleep();
     while(1)
     {
         if ( (systemState == sleepMode) && (gprs_state_machine == GPRS_INIT) )
         {
-            write_gprs_command("AT+CPOF\r\n","OK\r\n",10);
-            while (TxBuffer_Uart_Head != TxBuffer_Uart_Tail){}
-            go_to_sleep();
+            tmpValue = RxBuffer_Uart_Head;
+            if ( write_gprs_command("AT+CPOF\r\n","OK\r\n",10) || tmpValue == RxBuffer_Uart_Head ) go_to_sleep();//if not came any respone
+            else { RxBuffer_Uart_Head =  tmpValue; systemState = wakeUpByTimerState;}
         }
         else
         {
@@ -45,34 +46,38 @@ void main(void)
         {
             if ( systemState == wakeUpByTimerState )
             {
-                    switch (listOfCommandsToExecuting[counterExecutedCommands])
-                    {
-                    case parkingLight_start:   { activateparkingLight();                            break; }
-                    case parkingLight_stop:    { deactivateparkingLight();                          break; }
-                    case key1_start:           { activateKey1();                                    break; }
-                    case key1_stop:            { deactivateKey1();                                  break; }
-                    case engine_start:         { startEngine();                                     break; }
-                    case engine_stop:          { stopEngine();                                      break; }
-                    case recirculare_start:    { activateFromPanel(recirculare);                    break; }
-                    case recirculare_stop:     { deactivateFromPanel(recirculare);                  break; }
-                    case ac_start:             { activateFromPanel(AC);                             break; }
-                    case ac_stop:              { deactivateFromPanel(AC);                           break; }
-                    case luneta_start:         { activateFromPanel(luneta);                         break; }
-                    case luneta_stop:          { deactivateFromPanel(luneta);                       break; }
-                    case parbriz_start:        { activateFromPanel(parbriz);                        break; }
-                    case pabriz_stop:          { deactivateFromPanel(parbriz);                      break; }
-                    case ventilator_3pozitie:  { activateVentilator(ventilator3);                   break; }
-                    case ventilator_4pozitie:  { activateVentilator(ventilator4);                   break; }
-                    case ventilator_off:       { deactivateVentilator(ventilator3 + ventilator4);   break; }
-                    case report:               { reportMethod();                                    break; }
-                    case delaySeconds:         { }
-                    default:break;
-                    }
+                switch (listOfCommandsToExecuting[counterExecutedCommands])
+                {
+                case parkingLight_start:   { activateparkingLight();                            break; }
+                case parkingLight_stop:    { deactivateparkingLight();                          break; }
+                case key1_start:           { activateKey1();                                    break; }
+                case key1_stop:            { deactivateKey1();                                  break; }
+                case engine_start:         { startEngine();                                     break; }
+                case engine_stop:          { stopEngine();                                      break; }
+                case recirculare_start:    { activateFromPanel(recirculare);                    break; }
+                case recirculare_stop:     { deactivateFromPanel(recirculare);                  break; }
+                case ac_start:             { activateFromPanel(AC);                             break; }
+                case ac_stop:              { deactivateFromPanel(AC);                           break; }
+                case luneta_start:         { activateFromPanel(luneta);                         break; }
+                case luneta_stop:          { deactivateFromPanel(luneta);                       break; }
+                case parbriz_start:        { activateFromPanel(parbriz);                        break; }
+                case pabriz_stop:          { deactivateFromPanel(parbriz);                      break; }
+                case ventilator_3pozitie:  { activateVentilator(ventilator3);                   break; }
+                case ventilator_4pozitie:  { activateVentilator(ventilator4);                   break; }
+                case ventilator_off:       { deactivateVentilator(ventilator3 + ventilator4);   break; }
+                case report:               { reportMethod();                                    break; }
+                case delaySeconds:         { }
+                default:break;
+                }
             }
             else if (systemState == wakeUpByKey2State)
             {
-                //commands for wakeupByKey
-                counterExecutedCommands++;
+                //commands in wakeupBy2Key
+                switch (listOfCommandsToExecuting[counterExecutedCommands])
+                {
+                case report:               { reportMethod();                                    break; }
+                default:                   { counterExecutedCommands++;                         break; }
+                }
             }
         }
         else
