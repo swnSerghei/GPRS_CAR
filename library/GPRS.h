@@ -9,8 +9,10 @@
 #define LIBRARY_GPRS_H_
 #include <msp430g2955.h>
 #include "library/commontypes.h"
-#include "wakeupByTimer.h"
 #include "timer.h"
+#include "uart.h"
+#include "parkingLight.h"
+#include "printf.h"
 extern const uint8 *SMSCommands[];
 extern const uint8 *GPRSCommands[];
 #define PWR_GPRS BIT0
@@ -47,6 +49,7 @@ enum CommandsBits
     ventilator_3pozitie,
     ventilator_4pozitie,
     ventilator_off,
+    report,
     delaySeconds,
     NrOfSMSComands
 };
@@ -60,7 +63,6 @@ bool  allCommandsExecuted;
 uint8 counterExecutedCommands;
 uint8 listOfCommandsToExecuting[NrOfSMSComands];
 uint8 counterHowManyCommands;
-bool needToSendSMS;
 enum GPRS_commands
 {
     SMS=0,
@@ -84,7 +86,7 @@ enum topologyRead
     readSMScontent,
     telephoneCall
 };
-uint32 StateOfCommands;
+
 
 void init_GPRS_only_on_Startup();
 void powerON_GPRS();

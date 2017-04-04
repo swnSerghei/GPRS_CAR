@@ -11,7 +11,7 @@ void initTimerOnlyOnPowerOn()
     minuts = 0;
     hours   = 0;
     TA1CCR0  = 0xC035;                        //need to calibrate for 100ms
-    TA1CTL  = TASSEL_2 + ID_3 + MC_1;
+    TA1CTL  = TASSEL_2 + ID_2 + MC_1;
     TA1CCTL0 = CCIE;
 ////    P1DIR |= ROTATION_PIN;
 //    P2SEL |= ROTATION_PIN;

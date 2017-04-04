@@ -7,23 +7,24 @@
 #include "GPRS.h"
 const uint8 *SMSCommands[]=
 {
-    {"parkingLight start"},
-    {"parkingLight stop"},
-    {"key1 start"},
-    {"key1 stop"},
-    {"engine start"},
-    {"engine stop"},
-    {"recirculare start"},
-    {"recirculare stop"},
-    {"ac start"},
-    {"ac stop"},
-    {"luneta start"},
-    {"luneta stop"},
-    {"parbriz start"},
-    {"pabriz stop"},
-    {"ventilator 3pozitie"},
-    {"ventilator 4pozitie"},
-    {"ventilator off"},
+    {"parkingLight_start"},
+    {"parkingLight_stop"},
+    {"key1_start"},
+    {"key1_stop"},
+    {"engine_start"},
+    {"engine_stop"},
+    {"recirculare_start"},
+    {"recirculare_stop"},
+    {"ac_start"},
+    {"ac_stop"},
+    {"luneta_start"},
+    {"luneta_stop"},
+    {"parbriz_start"},
+    {"parbriz_stop"},
+    {"ventilator_3pozitie"},
+    {"ventilator_4pozitie"},
+    {"ventilator_off"},
+    {"report"},
     {"delaySeconds"}
 };
 
@@ -39,8 +40,6 @@ uint8 *telephonNumbers[]=
  {"40757294327"},
  {"37379548801"}
 };
-
-
 void init_GPRS_only_on_PowerOn()
 {
     uint8 i;
@@ -48,7 +47,6 @@ void init_GPRS_only_on_PowerOn()
     PresentAnyCommand = false;
     counterHowManyCommands=0;
     counterExecutedCommands=0;
-    needToSendSMS = false;
     for (i=0;i<NrOfSMSComands;i++)
     {
         listOfCommandsToExecuting[i] = 0;
@@ -60,8 +58,8 @@ void powerON_GPRS()
     P4OUT |= PWR_GPRS;
     whaitTimer=0;while (whaitTimer < POWER_ON_BUTTON){}
     P4OUT &= ~PWR_GPRS;
-    wait_gprs_response("CREG",60);                     //whaite CREG
-    wait_gprs_response("CREG",60);                     //whaite CREG
+    wait_gprs_response("CINIT:",60);                     //whaite CREG
+    wait_gprs_response("CINIT:",60);                     //whaite CREG
     wait_gprs_response("bla",10);                                             //only for whaite 1 seconds
     write_gprs_command("AT+CPIN=\"1989\"\r\n","CREG",40);  //enter the pin
     wait_gprs_response("bla",10);                                             //only for whaite 1 seconds
@@ -79,7 +77,6 @@ bool wait_gprs_response(uint8 *command,uint8 whaiteTime)
         if (command[i] == '\0')
         {
             //putInUartBuffer("return1: %d, %d \r\n",seconds,gprs_second);
-            //__delay_cycles(4000000);
             return 1;
         }
         else
@@ -100,11 +97,9 @@ bool wait_gprs_response(uint8 *command,uint8 whaiteTime)
 void wait_gprs_loop()
 {
     uint8 i,j,k;
-    static uint8 onlyOnce = 1;
     static uint8 topologyCheck = 0;
     if ( RxBuffer_Uart_Head != RxBuffer_Uart_Tail )
     {
-       if (onlyOnce) { __delay_cycles(1000000);onlyOnce--; }
        if (topologyCheck == readGPRSCommand)
        {
            for(i=0; i < totalGPRScomands; i++)
@@ -117,9 +112,11 @@ void wait_gprs_loop()
                       if ( i == SMS )
                       {
                           GPRSCommands_Counter[i]=0;whaitTimer = 0; PresentAnyCommand = true; topologyCheck = readTelephonNumber;
-                          //print("Present SMS command\r\n");
+#ifdef debugMode == 1
+                          print("Present SMS command\r\n");
+#endif
                       }
-                      else if ( i == CALL ) {GPRSCommands_Counter[i]=0;write_gprs_command("ATH\r\n","OK\r\n",1);}              //echo off//to do something}
+                      else if ( i == CALL ) {GPRSCommands_Counter[i]=0;write_gprs_command("ATH\r\n","OK\r\n",1);}
                     }
                 }
                 else GPRSCommands_Counter[i] = 0;
@@ -135,7 +132,10 @@ void wait_gprs_loop()
                        if ( telephonNumbers[j][telephonNumbers_Counter[j]] == '\0' )
                        {
                            telephonNumbers_Counter[j] = 0; whaitTimer = 0;PresentAnyCommand = true; topologyCheck = readSMScontent;
-                           //print("Present tel Number command\r\n");
+
+#ifdef debugMode == 1
+                           print("Present tel Number command\r\n");
+#endif
                        }
                    }
                    else telephonNumbers_Counter[j] = 0;
@@ -151,8 +151,11 @@ void wait_gprs_loop()
                       if (SMSCommands[k][countForEachCommand[k]] == '\0')
                       {
                           listOfCommandsToExecuting[counterHowManyCommands] = k; counterHowManyCommands++; allCommandsExecuted = false; countForEachCommand[k]=0;
-                          //print("Present command\r\n");
-                      }//newStateOfCommands=k;
+
+#ifdef debugMode == 1
+                          print("Present command\r\n");
+#endif
+                      }
                   }
                   else countForEachCommand[k] = 0;
                }
@@ -164,9 +167,11 @@ void wait_gprs_loop()
     {
         if ( whaitTimer >= timeToInvalidate && PresentAnyCommand )
         {
-            whaitTimer = 0;onlyOnce = 1;
             PresentAnyCommand = false; topologyCheck = readGPRSCommand;
-            //print("Timeout command\r\n");
+
+#ifdef debugMode == 1
+            print("Timeout command\r\n");
+#endif
         }
     }
 }

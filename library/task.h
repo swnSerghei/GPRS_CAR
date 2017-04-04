@@ -14,9 +14,8 @@
 #include "key.h"
 #include "interrupts.h"
 #include "GPRS.h"
-#include "wakeupByTimer.h"
 #define WAKEUP_AFTER_X_SECONDS 120
-#define STAY_AWAKE 60
+#define STAY_AWAKE 120
 uint8 systemState;
 
 enum wakeUpReason
@@ -29,5 +28,4 @@ void task1s();
 void task100ms();
 void go_to_sleep();
 void wakeUp();
-
 #endif /* LIBRARY_TASK_H_ */

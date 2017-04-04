@@ -35,7 +35,7 @@ void configureFrequency()
 {
     DCOCTL = CALDCO_16MHZ;                  // Set DCO step and modulation
     BCSCTL1 = CALBC1_16MHZ;                 // Set range
-    BCSCTL2 = DIVS_2;                       //SMCLK set 16Mhz/4=4Mhz
+    BCSCTL2 = DIVS_3;                       //SMCLK set 16Mhz/8=2Mhz
 }
 #pragma vector=WDT_VECTOR                   // Watchdog Timer interrupt service routine
 

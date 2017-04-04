@@ -12,29 +12,25 @@ __interrupt void TIMER0_A1_ISR (void)
       if (TA0IV & TA0IV_TAIFG)  // Vector 10:  TAIFG
       {
           OverFlowOcured = true;
-          if ( KarStastes == motorStart )
+          if ( KarStastes == motorStarted )
           {
+#ifdef debugMode == 1
+              print("OVF%d\r\n",OverflowOcuredInEngineStarted);
+#endif
               OverflowOcuredInEngineStarted++;
               if ( OverflowOcuredInEngineStarted == STOPENGINEAFTER_X_TIMES_OVERFLOWS )
               {
                   OverflowOcuredInEngineStarted = 0;
+                  retryersToStartEngine++;
                   if ( counterExecutedCommands )
                   {
-                      KarStastes = Key3fail1;
-                      StateOfCommands &= ~(uint32)1<<engine_start;
-                      waitKeyTimer = 0;
-                      retryersToStartEngine++;
-                      counterExecutedCommands--;
-                      listOfCommandsToExecuting[counterExecutedCommands] = engine_start;
+                      KarStastes = Key3fail1; waitKeyTimer = 0;
+                      counterExecutedCommands--;listOfCommandsToExecuting[counterExecutedCommands] = engine_start;
                   }
                   else
                   {
-                      counterHowManyCommands++;
-                      waitKeyTimer = 0;
-                      KarStastes = Key3fail1;
-                      StateOfCommands &= ~(uint32)1<<engine_start;
-                      retryersToStartEngine++;
-                      listOfCommandsToExecuting[counterExecutedCommands] = engine_start;
+                      counterHowManyCommands++;listOfCommandsToExecuting[counterExecutedCommands] = engine_start;
+                      KarStastes = Key3fail1; waitKeyTimer = 0;
                       allCommandsExecuted = false;
                   }
               }
@@ -63,25 +59,28 @@ __interrupt void Timer1_A1 (void)
         if (seconds == 60)
         {
             seconds=0;minuts++;
-            if (StateOfCommands & ((uint32)1<<parkingLight_start))
+            if ( parkingLightState )
             {
                 counter_StayActive_ParckingLight++;
                 if (counter_StayActive_ParckingLight == StayActive_ParckingLight)
                 {
-                    StateOfCommands &= ~((uint32)1<<parkingLight_start);
-                    P4OUT &= ~parkingLightPin;
-                    //print("parkingLight_stop\r\n");
+                    deactivateparkingLight();
+#ifdef debugMode == 1
+                    print("parkingLight_stop\r\n");
+#endif
                 }
             }
-            if (StateOfCommands & ((uint32)1<<engine_start))
+            if ( KarStastes == motorStarted )
             {
                 counter_StayActive_EngineStart++;
                 if (counter_StayActive_EngineStart == StayActive_EngineStart)
                 {
-                    StateOfCommands &= ~((uint32)1<<engine_start);
-                    P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE );
-                    KarStastes = KeysOff;
-                    //print("engine_stoped\r\n");
+                    deactivateVentilator(ventilator4 + ventilator3);
+                    P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
+                    deactivateFromPanel(AC);deactivateFromPanel(recirculare);deactivateFromPanel(parbriz);deactivateFromPanel(luneta);
+#ifdef debugMode == 1
+                    print("engine_stoped\r\n");
+#endif
                 }
             }
         }
@@ -98,20 +97,22 @@ __interrupt void Timer1_A1 (void)
         }
         else if ( wakeupTimer == (WAKEUP_AFTER_X_SECONDS + STAY_AWAKE) && systemState == wakeUpByTimerState )
         {
-            if ( (!PresentAnyCommand) && allCommandsExecuted && KarStastes != motorStart)
+            if ( (!PresentAnyCommand) && allCommandsExecuted && KarStastes != motorStarted)
             {
                 systemState = sleepMode;
             }
             else wakeupTimer--;
-            //go_to_sleep();
         }
-        if ( (KarStastes != KeysOff && systemState != wakeUpByKey2State) && (!shifterState() || !parkingState()) )
+        if ( KarStastes == motorStarted && systemState != wakeUpByKey2State && (!shifterState() || !parkingState()) )
         {
-            if ( listOfCommandsToExecuting[counterExecutedCommands] == engine_start ) counterExecutedCommands++;
-            P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE );
-            StateOfCommands &= ~((uint32)1<<engine_start);
-            KarStastes = KeysOff;
-            //print("cancel to start engine: s=%d,p=%d\r\n",shifterState(),parkingState());
+            if ( counterExecutedCommands ) { counterExecutedCommands--; listOfCommandsToExecuting[counterExecutedCommands] = engine_stop; }
+            else { counterHowManyCommands++; listOfCommandsToExecuting[counterExecutedCommands] = engine_stop; }
+            //P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE );
+            //KarStastes = KeysOff;
+
+#ifdef debugMode == 1
+            print("cancel to start engine: s=%d,p=%d\r\n",shifterState(),parkingState());
+#endif
         }
     }
     //if ( (P2IN & KEY2_DIAG) && interruptByKey1_treated )  {systemState = wakeUpByKey2State; interruptByKey1_treated = false;}
@@ -126,23 +127,33 @@ __interrupt void port1_isr(void)
 	    P1IFG &= ~KEY2_DIAG;
 	    if (P1IN & KEY2_DIAG)
 	    {
-            P1IES |= KEY2_DIAG;
-            interruptByKey2_treated = false;
-            if ( gprs_state_machine != GPRS_INIT )
-            {
-                wakeUp();LPM1_EXIT;
-                //print("Key2 ON\r\n");
-            }
+	        if (systemState == sleepMode) { wakeUp();LPM1_EXIT; }
+#ifdef debugMode == 1
+	        print("Key2 ON\r\n");
+#endif
+	        deactivateparkingLight();
+            deactivateVentilator(ventilator4 + ventilator3);
+            P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
+            deactivateFromPanel(AC);deactivateFromPanel(recirculare);deactivateFromPanel(parbriz);deactivateFromPanel(luneta);
+
+            if ( carLearn == Learn ) { TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN; }
+
+
             tmpCounterForCalculateKeyTime = 0;
             systemState = wakeUpByKey2State;
+
+            P1IES |= KEY2_DIAG;
 	    }
         else//on faling
         {
-            P1IES &= ~KEY2_DIAG;
-
-            //if ( gprs_state_machine == GPRS_INIT ) wakeupTimer = WAKEUP_AFTER_X_SECONDS + 1;
-            //print("Key2 OFF\r\n");
+#ifdef debugMode == 1
+            print("Key2 OFF\r\n");
+#endif
+            key2_diag_fallingOcured1 = true;
+            key2_diag_fallingOcured2 = true;
             systemState = wakeUpByTimerState;
+
+            P1IES &= ~KEY2_DIAG;
         }
 	}
 
@@ -151,46 +162,52 @@ __interrupt void port1_isr(void)
         P1IFG &= ~KEY3_DIAG;
         if ( P1IN & KEY3_DIAG )//on rising
         {
-            P1IES |= KEY3_DIAG;
-            //print("Key3 ON\r\n");
+#ifdef debugMode == 1
+            print("Key3 ON\r\n");
+#endif
             tmpKey3Time=0;
             P2IE |= ROTATION_PIN;
-
-            if (carLearn == NotLearn && (tmpCounterForCalculateKeyTime < OVERFLOW_TIME_BETWEEN_KEYS) )
+            if (carLearn == NotLearn && key2_diag_fallingOcured1)
             {
                 TA0CTL |= MC_2;
                 TA0IV &= ~TA0IV_TAIFG;
-                TA0CTL |= TAIE ;
+                TA0CTL |= TAIE;
+                key2_diag_fallingOcured1 = false;
                 if (carLearnTimes < LEARNING_TIMES)
                 {
-
-                    if (!timeBetween2Key_3Key) {timeBetween2Key_3Key+=tmpCounterForCalculateKeyTime;}
-                    else {timeBetween2Key_3Key+=tmpCounterForCalculateKeyTime;timeBetween2Key_3Key/=2;}
-                    //print("carLearnTimes: %d, %d\r\n",carLearnTimes,timeBetween2Key_3Key);
+                    if ( !timeBetween2Key_3Key ) { timeBetween2Key_3Key+=tmpCounterForCalculateKeyTime; }
+                    else { timeBetween2Key_3Key+=tmpCounterForCalculateKeyTime;timeBetween2Key_3Key/=2; }
                     carLearnTimes++;
+#ifdef debugMode == 1
+                    print("carLearnTimes: %d, %d\r\n",carLearnTimes,timeBetween2Key_3Key);
+#endif
                 }
             }
+            P1IES |= KEY3_DIAG;
         }
         else //on faling
         {
-            P1IES &= ~KEY3_DIAG;
-
-            //print("Key3 OFF\r\n");
-            if ( carLearn != Learn )
+#ifdef debugMode == 1
+            print("Key3 OFF\r\n");
+#endif
+            if ( carLearn != Learn && key2_diag_fallingOcured2 )
             {
+                key2_diag_fallingOcured2 = false;
+                if ( avgRotationSpeed == 0 ) if (carLearnTimes) carLearnTimes--;
                 if (carLearnTimes == LEARNING_TIMES)
                 {
                     carLearn = Learn;
-                    avgRotationSpeed += avgRotationSpeed/50;// add error 2%
-                    needToSendSMS = true;
-                    //print("car learned with:%d rotation\r\n", avgRotationSpeed);
+                    if ( (0xFFFF - (avgRotationSpeed/25)) >  avgRotationSpeed ) avgRotationSpeed = avgRotationSpeed + avgRotationSpeed/25;// add error 4%
+#ifdef debugMode == 1
+                    print("car learned with:%d rotation\r\n", avgRotationSpeed);
+#endif
                 }
                 if ( holdKey3Time ) {holdKey3Time += tmpKey3Time; holdKey3Time >>= 1;}
                 else holdKey3Time += tmpKey3Time;
             }
+            P1IES &= ~KEY3_DIAG;
         }
     }
-
     __enable_interrupt();
 }
 
@@ -199,16 +216,13 @@ __interrupt void port2_isr(void)
 {
     if ( P2IFG & ROTATION_PIN )
         {
-            P2IFG &= ~ROTATION_PIN;
+            OverflowOcuredInEngineStarted = 0;
             if ( !OverFlowOcured )
             {
                 if ( carLearn != Learn )
                 {
                     if ( avgRotationSpeed ) {avgRotationSpeed+= TA0R;avgRotationSpeed>>=1;}
-                    else
-                    {
-                        avgRotationSpeed = TA0R;
-                    }
+                    else avgRotationSpeed = TA0R;
                 }
                 else
                 {
@@ -217,12 +231,16 @@ __interrupt void port2_isr(void)
                     if ( avgRotationSpeedValidate < ( avgRotationSpeed ) )
                     {
                         OverRotationTimeValidation--;
-                        if ( KarStastes == Key3on && !OverRotationTimeValidation ) KarStastes = motorStart;
+                        if ( KarStastes == Key3on && !OverRotationTimeValidation )
+                        {
+                            KarStastes = motorStarted;
+                        }
                     }
                 }
             }
             else { OverFlowOcured = false;}
             TA0R = 1;
+            P2IFG &= ~ROTATION_PIN;
         }
     __enable_interrupt();
 }

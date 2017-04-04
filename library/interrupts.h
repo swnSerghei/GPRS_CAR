@@ -18,5 +18,7 @@
 #include "panel.h"
 #include "GPRS.h"
 #include "parkingLight.h"
-bool interruptByKey2_treated;
+
+//counterDelay
+
 #endif /* INTERRUPTS_H_ */

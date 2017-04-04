@@ -9,6 +9,7 @@
 #include "library/parkingLight.h"
 #include "library/key.h"
 #include "library/panel.h"
+#define debugMode 0
 /*
  * main.c
  */
@@ -28,7 +29,7 @@ void main(void)
     gprs_state_machine = GPRS_INIT;// for allow to go in sleep first time only
     while(1)
     {
-        if ( (systemState == sleepMode ) && (gprs_state_machine == GPRS_INIT) && interruptByKey2_treated)
+        if ( (systemState == sleepMode) && (gprs_state_machine == GPRS_INIT) )
         {
             write_gprs_command("AT+CPOF\r\n","OK\r\n",10);
             while (TxBuffer_Uart_Head != TxBuffer_Uart_Tail){}
@@ -38,57 +39,20 @@ void main(void)
         {
             if ( gprs_state_machine == GPRS_SLEEP ) powerON_GPRS();
             else wait_gprs_loop();
-
-            //if ( gprs_state_machine == GPRS_INIT )  wait_gprs_loop();
-
-        }
-        if ( needToSendSMS && gprs_state_machine == GPRS_INIT)
-        {
-            write_gprs_command("AT+CMGS=\"0757294327\"\r\n",">\r\n",10);
-            print("the car learned:\r\n");
-            print("rotaion with:%d\r\n",avgRotationSpeed);
-            print("time between Key2 and key3:%dmS\r\n",timeBetween2Key_3Key*100);
-            print("time hold key3:%dmS\r\n",holdKey3Time*100);
-            putInUartBuffer(26);//ctrl+z
-            wait_gprs_response("OK",10);
-            needToSendSMS = false;
-        }
-        if ( !interruptByKey2_treated )
-        {
-            P4OUT &= ~parkingLightPin;
-            P3OUT &= ~( ventilator_3pozitie + ventilator_4pozitie );
-            P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
-
-            if ( carLearn == Learn ) { TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN; }
-
-            StateOfCommands &= ~((uint32)1<<parkingLight_start);
-            StateOfCommands &= ~((uint32)3<<ventilator_3pozitie);
-            StateOfCommands &= ~((uint32)1<<key1_start);
-            StateOfCommands &= ~((uint32)1<<engine_start);
-
-            StateOfCommands &= ~((uint32)1<<ac_start);
-            StateOfCommands &= ~((uint32)1<<luneta_start);
-            StateOfCommands &= ~((uint32)1<<parbriz_start);
-            StateOfCommands &= ~((uint32)1<<recirculare_start);
-
-            if ( allCommandsExecuted != true ) counterExecutedCommands++;
-            interruptByKey2_treated = true;
         }
 
         if ( counterExecutedCommands < counterHowManyCommands)
         {
             if ( systemState == wakeUpByTimerState )
             {
-                if ( interruptByKey2_treated )
-                {
                     switch (listOfCommandsToExecuting[counterExecutedCommands])
                     {
-                    case parkingLight_start:   { activateparkingLight();     break; }
-                    case parkingLight_stop:    { deactivateparkingLight();   break; }
-                    case key1_start:           { activateKey1();             break; }
-                    case key1_stop:            { deactivateKey1();           break; }
-                    case engine_start:         { startEngine();              break; }
-                    case engine_stop:          { stopEngine();               break; }
+                    case parkingLight_start:   { activateparkingLight();                            break; }
+                    case parkingLight_stop:    { deactivateparkingLight();                          break; }
+                    case key1_start:           { activateKey1();                                    break; }
+                    case key1_stop:            { deactivateKey1();                                  break; }
+                    case engine_start:         { startEngine();                                     break; }
+                    case engine_stop:          { stopEngine();                                      break; }
                     case recirculare_start:    { activateFromPanel(recirculare);                    break; }
                     case recirculare_stop:     { deactivateFromPanel(recirculare);                  break; }
                     case ac_start:             { activateFromPanel(AC);                             break; }
@@ -100,9 +64,10 @@ void main(void)
                     case ventilator_3pozitie:  { activateVentilator(ventilator3);                   break; }
                     case ventilator_4pozitie:  { activateVentilator(ventilator4);                   break; }
                     case ventilator_off:       { deactivateVentilator(ventilator3 + ventilator4);   break; }
+                    case report:               { reportMethod();                                    break; }
+                    case delaySeconds:         { }
                     default:break;
                     }
-                }
             }
             else if (systemState == wakeUpByKey2State)
             {

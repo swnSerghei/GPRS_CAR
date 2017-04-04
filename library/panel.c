@@ -15,7 +15,7 @@ void initPanel()
 }
 void activateFromPanel(uint8 activateWhat)
 {
-    if ( (StateOfCommands & ((uint32)1<<engine_start)) )
+    if ( KarStastes == motorStarted )
     {
         switch ( activateWhat )
         {
@@ -43,27 +43,11 @@ void activateFromPanel(uint8 activateWhat)
 }
 void deactivateFromPanel(uint8 deactivateWhat)
 {
-    if ( (StateOfCommands & ((uint32)1<<engine_start)) )
+    if ( KarStastes == motorStarted )
     {
-        switch ( deactivateWhat )
-        {
-            case AC:
-            {
-                if ( statesOfVentilator & (ventilator3 + ventilator4) )
-                {
-                    if ( statesOfPannel & AC ) { counterExecutedCommands++; buttonState = buttonOff;}
-                    else if (buttonState == buttonOff) {P2OUT |= AC; buttonState = buttonPress; waitPanelTimer=0;}
-                    else if ( waitPanelTimer > 5){P2OUT &= ~AC; buttonState = buttonOff; statesOfPannel |= AC;counterExecutedCommands++;}
-                }
-                else counterExecutedCommands++;//can't execute because ventilators is off
-            }
-            default:
-            {
-                if ( statesOfPannel & deactivateWhat ) { counterExecutedCommands++; buttonState = buttonOff;}
-                else if (buttonState == buttonOff) {P2OUT |= deactivateWhat; buttonState = buttonPress; waitPanelTimer=0;}
-                else if ( waitPanelTimer > 5){P2OUT &= ~deactivateWhat; buttonState = buttonOff; statesOfPannel &= ~deactivateWhat;counterExecutedCommands++;}
-            }
-        }
+        if ( !(statesOfPannel & deactivateWhat) ) { counterExecutedCommands++; buttonState = buttonOff;}
+        else if (buttonState == buttonOff) {P2OUT |= deactivateWhat; buttonState = buttonPress; waitPanelTimer=0;}
+        else if ( waitPanelTimer > 5){P2OUT &= ~deactivateWhat; buttonState = buttonOff; statesOfPannel &= ~deactivateWhat;counterExecutedCommands++;}
     }
     else //engine not start
     {
@@ -72,7 +56,7 @@ void deactivateFromPanel(uint8 deactivateWhat)
 }
 void activateVentilator(uint8 ventilatoorPozition)
 {
-    if ( (StateOfCommands & ((uint32)1<<engine_start)) )
+    if ( KarStastes == motorStarted )
     {
         if ( statesOfVentilator & ventilatoorPozition ) counterExecutedCommands++;
         else

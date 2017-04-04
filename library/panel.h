@@ -10,6 +10,7 @@
 #include <msp430g2955.h>
 #include "commontypes.h"
 #include "GPRS.h"
+#include "key.h"
 #define AC BIT0
 #define recirculare BIT4
 #define parbriz BIT2

@@ -11,6 +11,7 @@ Clock			Baudrate		UCBRx		UCBRSx		UCBRFx	UCOS16 = 0 (continued)
 1,048,576       9600            109         2           0
 4,000,000       9600            416(160+1)  6           0
 4,000,000       115200          34          6           0
+2,000,000       115200          17          3           0
 8,000,000       9600            833         2           0
 16,000,000      9600            1666        6           0
 Clock           Baudrate        UCBRx       UCBRSx      UCBRFx  UCOS16 = 1
@@ -24,9 +25,9 @@ void Init_Uart()
 	P3SEL  |=   RXD + TXD ; // P3.4 = RXD, P3.5=TXD
 	UCA0CTL1 |= UCSWRST;                      			// Enable SW reset
 	UCA0CTL1 |= UCSSEL_2; // SMCLK
-	UCA0BR0 = 34; // 4MHz
+	UCA0BR0 = 17; // 4MHz
 	UCA0BR1 = 0;
-	UCA0MCTL = UCBRS_6;
+	UCA0MCTL = UCBRS_3 + UCBRF_0;
     //UCA0CTL0 |= UCPAR+UCPEN;
     UCA0CTL1 &= ~UCSWRST;                               // **Initialize USCI state machine**
 	IFG2 &= ~UCA0TXIFG;
