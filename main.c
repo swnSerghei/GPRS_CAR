@@ -33,14 +33,13 @@ void main(void)
         if ( (systemState == sleepMode) && (gprs_state_machine == GPRS_INIT) )
         {
             tmpValue = RxBuffer_Uart_Head;
-            if ( write_gprs_command("AT+CPOF\r\n","OK\r\n",10) || tmpValue == RxBuffer_Uart_Head ) go_to_sleep();//if not came any respone
+            if ( write_gprs_command("AT+CPOF\r\n","OK\r\n",10) || tmpValue == RxBuffer_Uart_Head ) go_to_sleep();//if not came any response or maybe in exact this time came any message
             else { RxBuffer_Uart_Head =  tmpValue; systemState = wakeUpByTimerState;}
         }
-        else
-        {
-            if ( gprs_state_machine == GPRS_SLEEP ) powerON_GPRS();
-            else wait_gprs_loop();
-        }
+
+        if ( gprs_state_machine == GPRS_SLEEP ) powerON_GPRS();
+
+        wait_gprs_loop();
 
         if ( counterExecutedCommands < counterHowManyCommands)
         {

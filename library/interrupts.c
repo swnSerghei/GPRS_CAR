@@ -124,7 +124,6 @@ __interrupt void port1_isr(void)
 {
 	if ( P1IFG & KEY2_DIAG ) //on rising
 	{
-	    P1IFG &= ~KEY2_DIAG;
 	    if (P1IN & KEY2_DIAG)
 	    {
 	        if (systemState == sleepMode) { wakeUp();LPM1_EXIT; }
@@ -154,11 +153,12 @@ __interrupt void port1_isr(void)
 
             P1IES &= ~KEY2_DIAG;
         }
+	    P1IFG &= ~KEY2_DIAG;
 	}
 
 	if (P1IFG & KEY3_DIAG)
     {
-        P1IFG &= ~KEY3_DIAG;
+
         if ( P1IN & KEY3_DIAG )//on rising
         {
 #ifdef debugMode == 1
@@ -192,7 +192,7 @@ __interrupt void port1_isr(void)
             if ( carLearn != Learn && key2_diag_fallingOcured2 )
             {
                 key2_diag_fallingOcured2 = false;
-                if ( avgRotationSpeed == 0 ) if (carLearnTimes) carLearnTimes--;
+                //if ( avgRotationSpeed == 0 ) if (carLearnTimes) carLearnTimes--;
                 if (carLearnTimes == LEARNING_TIMES)
                 {
                     carLearn = Learn;
@@ -204,8 +204,8 @@ __interrupt void port1_isr(void)
                 if ( holdKey3Time ) {holdKey3Time += tmpKey3Time; holdKey3Time >>= 1;}
                 else holdKey3Time += tmpKey3Time;
             }
-            P1IES &= ~KEY3_DIAG;
         }
+        P1IFG &= ~KEY3_DIAG;
     }
     __enable_interrupt();
 }
@@ -227,7 +227,7 @@ __interrupt void port2_isr(void)
                 {
                     if ( avgRotationSpeedValidate ) { avgRotationSpeedValidate += TA0R; avgRotationSpeedValidate>>=1; }
                     else avgRotationSpeedValidate = TA0R;
-                    if ( avgRotationSpeedValidate < ( avgRotationSpeed ) )
+                    if ( avgRotationSpeedValidate < avgRotationSpeed )
                     {
                         OverRotationTimeValidation--;
                         if ( KarStastes == Key3on && !OverRotationTimeValidation )

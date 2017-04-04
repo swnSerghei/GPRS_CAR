@@ -18,7 +18,7 @@
 #include "panel.h"
 #include "GPRS.h"
 #include "parkingLight.h"
-bool whantToGoToSleep;
+
 //counterDelay
 
 #endif /* INTERRUPTS_H_ */
