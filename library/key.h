@@ -38,7 +38,7 @@ uint8 NotActiveTime;
 #define OVERFLOW_TIME_BETWEEN_KEYS 250//25seconds
 #define DELAY_AFTER_FAILED_START 50     //5 seconds
 #define RETRY_TIMES 3                   //3 time retry to start the car
-#define HOLD_KEY3_MORE 20
+#define HOLD_KEY3_MORE 10
 //#define SECOND 10   //10*100mS
 uint8 retryersToStartEngine;
 bool carLearn;

@@ -75,16 +75,25 @@ void startEngine()
                }
                else if ( KarStastes == KeysOff )
                {
+                   P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
+#if debugMode == 1
+                   print("activate key1 from KeysOff\r\n");
+#endif
+               }
+               else if ( KarStastes == Key1on && waitKeyTimer >= 10 )
+               {
                    P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
 #if debugMode == 1
                    print("activate key2\r\n");
 #endif
                }
+
                else if ( KarStastes == Key2on && waitKeyTimer >= timeBetween2Key_3Key)
                {
 #if debugMode == 1
                    print("activate key3\r\n");
 #endif
+                   P1OUT &= ~KEY1_ENABLE;                                                           //deactivate key1 when start engine
                    OverRotationTimeValidation = OVER_ROTATION_TIME;avgRotationSpeedValidate = 0;
                    P1OUT |= KEY3_ENABLE;KarStastes = Key3on; waitKeyTimer =0;
                    TA0CTL |= MC_2;TA0IV &= ~TA0IV_TAIFG;TA0CTL |= TAIE ;P2IE |= ROTATION_PIN;
@@ -102,6 +111,7 @@ void startEngine()
                {
                    counterExecutedCommands++; counter_StayActive_EngineStart = 0;
                    OverflowOcuredInEngineStarted = 0;P1OUT &= ~KEY3_ENABLE;
+                   P1OUT |= KEY1_ENABLE;
 #if debugMode == 1
                    print("engine started:%d\r\n",avgRotationSpeedValidate);
 #endif
