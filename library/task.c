@@ -18,11 +18,9 @@ void go_to_sleep()
     TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN;
     TxBuffer_Uart_Head = 0;
     TxBuffer_Uart_Tail = 0;
-    gprs_second = 0;
-    gprs_minuts = 0;
     wakeupTimer = 0;
-    gprs_state_machine = GPRS_SLEEP;
     uninit_uart();
+    gprs_state_machine = GPRS_SLEEP;
     LPM1; // Enter LPM1 w/interrupt
 }
 void wakeUp()

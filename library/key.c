@@ -17,6 +17,7 @@ void keyPosition_init()
     carLearnTimes = 0;
     timeBetween2Key_3Key = 0;
     holdKey3Time = 0;
+    NotActiveTime = 0;
     //timeBetween2Key_3Key = 0;//
     KarStastes = KeysOff;
     counter_StayActive_ParckingLight = 0;
@@ -43,13 +44,15 @@ bool shifterState()
 void reportMethod()
 {
        write_gprs_command("AT+CMGS=\"0757294327\"\r\n",">\r\n",10);
-       print("Learn:%d\r\n",carLearn);
-       print("rotation:%d\r\n",avgRotationSpeed);
+       wait_gprs_response("bla",10);                                             //only for whaite 1 seconds
+       print("Learn:%d from %d\r\n",carLearnTimes,LEARNING_TIMES);
+       print("AVGrot:%d\r\n",avgRotationSpeed);
+       print("rotat:%d\r\n",avgRotationSpeedValidate);
        print("time_2Key_3Key:%d\r\n",timeBetween2Key_3Key);
        print("holdKey3Time:%d\r\n",holdKey3Time);
        print("parkLight:%d\r\n",parkingLightState);
        print("KarStastes:%d\r\n",KarStastes);
-       print("parkBreak:%d\r\n",parkingState());
+       print("break:%d\r\n",parkingState());
        print("shifter:%d\r\n",shifterState());
        print("ventilator:%d\r\n",statesOfVentilator);
        print("panel:%d\r\n",statesOfPannel);
@@ -66,40 +69,32 @@ void startEngine()
                 if ( KarStastes == KeysOffFailed && waitKeyTimer >= 10)
                {
                    P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
-#ifdef debugMode == 1
+#if debugMode == 1
                    print("activate key1 from KeysOffFail\r\n");
 #endif
                }
                else if ( KarStastes == KeysOff )
                {
-                   P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
-
-#ifdef debugMode == 1
-                   print("activate key1 from KeysOff\r\n");
-#endif
-               }
-               else if ( KarStastes == Key1on && waitKeyTimer >= 10 )
-               {
                    P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
-#ifdef debugMode == 1
+#if debugMode == 1
                    print("activate key2\r\n");
 #endif
                }
                else if ( KarStastes == Key2on && waitKeyTimer >= timeBetween2Key_3Key)
                {
-#ifdef debugMode == 1
+#if debugMode == 1
                    print("activate key3\r\n");
 #endif
                    OverRotationTimeValidation = OVER_ROTATION_TIME;avgRotationSpeedValidate = 0;
                    P1OUT |= KEY3_ENABLE;KarStastes = Key3on; waitKeyTimer =0;
-                   TA0CTL |= MC_2;TA0IV &= ~TA0IV_TAIFG;TA0CTL |= TAIE ;
+                   TA0CTL |= MC_2;TA0IV &= ~TA0IV_TAIFG;TA0CTL |= TAIE ;P2IE |= ROTATION_PIN;
                }
                else if ( KarStastes == Key3on && waitKeyTimer >= (holdKey3Time + HOLD_KEY3_MORE))
                {
                    P1OUT &= ~KEY3_ENABLE;
                    KarStastes = Key3fail1;waitKeyTimer =0;
                    retryersToStartEngine++;
-#ifdef debugMode == 1
+#if debugMode == 1
                    print("engine start fail %d,with rotation %d\r\n",retryersToStartEngine,avgRotationSpeedValidate);
 #endif
                }
@@ -107,7 +102,7 @@ void startEngine()
                {
                    counterExecutedCommands++; counter_StayActive_EngineStart = 0;
                    OverflowOcuredInEngineStarted = 0;P1OUT &= ~KEY3_ENABLE;
-#ifdef debugMode == 1
+#if debugMode == 1
                    print("engine started:%d\r\n",avgRotationSpeedValidate);
 #endif
                }
@@ -115,7 +110,7 @@ void startEngine()
                {
                    P1OUT &= ~KEY2_ENABLE;
                    KarStastes = key3fail2;waitKeyTimer =0;
-#ifdef debugMode == 1
+#if debugMode == 1
                    print("Key3fail1\r\n");
 #endif
                }
@@ -123,7 +118,7 @@ void startEngine()
                {
                  P1OUT &= ~KEY1_ENABLE;
                  KarStastes = KeysOffFailed; waitKeyTimer = 0;
-#ifdef debugMode == 1
+#if debugMode == 1
                  print("Key3fail2\r\n");
 #endif
                }
@@ -135,7 +130,7 @@ void startEngine()
 //            if ( KarStastes == Key3on ) { P1OUT &= ~KEY3_ENABLE; waitKeyTimer = 0; KarStastes = Key2on; listOfCommandsToExecuting[counterExecutedCommands] = engine_stop; }
 //            else if ( KarStastes == Key2on || KarStastes == Key3fail1 ) { P1OUT &= ~KEY2_ENABLE; waitKeyTimer = 0; KarStastes = Key1on; listOfCommandsToExecuting[counterExecutedCommands] = engine_stop; }
 //            else { P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE );counterExecutedCommands++; }
-#ifdef debugMode == 1
+#if debugMode == 1
             print("engine can't start, to much retryes, breake or shifter\r\n");
 #endif
         }
@@ -143,7 +138,7 @@ void startEngine()
     else
     {
         counterExecutedCommands++;
-#ifdef debugMode == 1
+#if debugMode == 1
         print("engine not learned\r\n");
 #endif
     }
@@ -153,7 +148,13 @@ void stopEngine()
     TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN;
     if ( KarStastes == Key3on ) { KarStastes = Key2on; P1OUT &= ~KEY3_ENABLE; waitKeyTimer = 0; }
     else if ( (KarStastes == motorStarted || KarStastes == Key2on || KarStastes == Key3fail1 ) && waitKeyTimer >= 10 ) { KarStastes = Key1on;P1OUT &= ~KEY2_ENABLE;waitKeyTimer = 0;}
-    else if ( ((KarStastes == Key1on || KarStastes == key3fail2) &&  waitKeyTimer >= 10) || KarStastes == KeysOff ) { KarStastes = KeysOff;P1OUT &= ~KEY1_ENABLE; counterExecutedCommands++;}
+    else if ( ((KarStastes == Key1on || KarStastes == key3fail2) &&  waitKeyTimer >= 10) || KarStastes == KeysOff )
+    {
+        KarStastes = KeysOff;P1OUT &= ~KEY1_ENABLE; counterExecutedCommands++;
+#if debugMode == 1
+                print("Engine Stoped\r\n");
+#endif
+    }
     //else { P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE ); KarStastes = KeysOff; counterExecutedCommands++; }//to be sure all keys off
 }
 void activateKey1()
@@ -161,7 +162,7 @@ void activateKey1()
     if ( KarStastes == KeysOff )
     {
         P1OUT |=  KEY1_ENABLE;KarStastes = Key1on;
-#ifdef debugMode == 1
+#if debugMode == 1
         print("key1_start\r\n");
 #endif
     }
@@ -172,9 +173,13 @@ void deactivateKey1()
     if ( KarStastes == Key1on )
     {
         P1OUT &= ~KEY1_ENABLE;KarStastes = KeysOff;
-#ifdef debugMode == 1
+#if debugMode == 1
         print("key1_stoped\r\n");
 #endif
     }
     counterExecutedCommands++;
+}
+void unlock()
+{
+
 }

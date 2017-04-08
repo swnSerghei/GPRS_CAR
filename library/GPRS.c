@@ -25,13 +25,14 @@ const uint8 *SMSCommands[]=
     {"ventilator_4pozitie"},
     {"ventilator_off"},
     {"report"},
+    {"unlock_doors"},
     {"delaySeconds"}
 };
 
 const uint8 *GPRSCommands[]=
 {
     {"+CMT: \"+"},
-    {"call"}
+    {"RING"}
 };
 
 
@@ -112,7 +113,7 @@ void wait_gprs_loop()
                       if ( i == SMS )
                       {
                           GPRSCommands_Counter[i]=0;whaitTimer = 0; PresentAnyCommand = true; topologyCheck = readTelephonNumber;
-#ifdef debugMode == 1
+#if debugMode == 1
                           print("Present SMS command\r\n");
 #endif
                       }
@@ -133,7 +134,7 @@ void wait_gprs_loop()
                        {
                            telephonNumbers_Counter[j] = 0; whaitTimer = 0;PresentAnyCommand = true; topologyCheck = readSMScontent;
 
-#ifdef debugMode == 1
+#if debugMode == 1
                            print("Present tel Number command\r\n");
 #endif
                        }
@@ -152,7 +153,7 @@ void wait_gprs_loop()
                       {
                           listOfCommandsToExecuting[counterHowManyCommands] = k; counterHowManyCommands++; allCommandsExecuted = false; countForEachCommand[k]=0;
 
-#ifdef debugMode == 1
+#if debugMode == 1
                           print("Present command\r\n");
 #endif
                       }
@@ -169,7 +170,7 @@ void wait_gprs_loop()
         {
             PresentAnyCommand = false; topologyCheck = readGPRSCommand;
 
-#ifdef debugMode == 1
+#if debugMode == 1
             print("Timeout command\r\n");
 #endif
         }

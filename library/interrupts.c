@@ -14,7 +14,7 @@ __interrupt void TIMER0_A1_ISR (void)
           OverFlowOcured = true;
           if ( KarStastes == motorStarted )
           {
-#ifdef debugMode == 1
+#if debugMode == 1
               print("OVF%d\r\n",OverflowOcuredInEngineStarted);
 #endif
               OverflowOcuredInEngineStarted++;
@@ -65,7 +65,7 @@ __interrupt void Timer1_A1 (void)
                 if (counter_StayActive_ParckingLight == StayActive_ParckingLight)
                 {
                     deactivateparkingLight();
-#ifdef debugMode == 1
+#if debugMode == 1
                     print("parkingLight_stop\r\n");
 #endif
                 }
@@ -78,7 +78,7 @@ __interrupt void Timer1_A1 (void)
                     deactivateVentilator(ventilator4 + ventilator3);
                     P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
                     deactivateFromPanel(AC);deactivateFromPanel(recirculare);deactivateFromPanel(parbriz);deactivateFromPanel(luneta);
-#ifdef debugMode == 1
+#if debugMode == 1
                     print("engine_stoped\r\n");
 #endif
                 }
@@ -87,19 +87,25 @@ __interrupt void Timer1_A1 (void)
         if (minuts == 60)
         {
             minuts=0;hours++;
+            if ( NotActiveTime != SLEEP_PERIODIC_AFTER ) NotActiveTime++;
         }
+
         wakeupTimer++;
+#if debugMode == 1
+        if ( systemState == wakeUpByTimerState ) print("wakeupTimer=%d\r\n",wakeupTimer);
+#endif
         if ( wakeupTimer == WAKEUP_AFTER_X_SECONDS && systemState == sleepMode )
         {
             systemState = wakeUpByTimerState;
             wakeUp();
             LPM1_EXIT;
         }
-        else if ( wakeupTimer == (WAKEUP_AFTER_X_SECONDS + STAY_AWAKE) && systemState == wakeUpByTimerState )
+        else if ( wakeupTimer == (WAKEUP_AFTER_X_SECONDS + STAY_AWAKE) )
         {
-            if ( (!PresentAnyCommand) && allCommandsExecuted && KarStastes != motorStarted)
+            if ( (!PresentAnyCommand) && allCommandsExecuted && KarStastes != motorStarted && systemState == wakeUpByTimerState )
             {
-                systemState = sleepMode;
+                if ( NotActiveTime == SLEEP_PERIODIC_AFTER) systemState = sleepMode;
+                //systemState = sleepMode;
             }
             wakeupTimer--;
         }
@@ -110,7 +116,7 @@ __interrupt void Timer1_A1 (void)
             //P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE );
             //KarStastes = KeysOff;
 
-#ifdef debugMode == 1
+#if debugMode == 1
             print("cancel to start engine: s=%d,p=%d\r\n",shifterState(),parkingState());
 #endif
         }
@@ -126,14 +132,16 @@ __interrupt void port1_isr(void)
 	{
 	    if (P1IN & KEY2_DIAG)
 	    {
-	        if (systemState == sleepMode) { wakeUp();LPM1_EXIT; }
-#ifdef debugMode == 1
+	        NotActiveTime = 0;
+	        if (systemState == sleepMode) { wakeUp(); LPM1_EXIT; wakeupTimer = WAKEUP_AFTER_X_SECONDS; }
+#if debugMode == 1
 	        print("Key2 ON\r\n");
 #endif
 	        deactivateparkingLight();
             deactivateVentilator(ventilator4 + ventilator3);
             P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
             deactivateFromPanel(AC);deactivateFromPanel(recirculare);deactivateFromPanel(parbriz);deactivateFromPanel(luneta);
+            retryersToStartEngine = 0;
 
             if ( carLearn == Learn ) { TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN; }
 
@@ -144,7 +152,7 @@ __interrupt void port1_isr(void)
 	    }
         else//on faling
         {
-#ifdef debugMode == 1
+#if debugMode == 1
             print("Key2 OFF\r\n");
 #endif
             key2_diag_fallingOcured1 = true;
@@ -161,23 +169,20 @@ __interrupt void port1_isr(void)
 
         if ( P1IN & KEY3_DIAG )//on rising
         {
-#ifdef debugMode == 1
+#if debugMode == 1
             print("Key3 ON\r\n");
 #endif
             tmpKey3Time=0;
-            P2IE |= ROTATION_PIN;
             if (carLearn == NotLearn && key2_diag_fallingOcured1)
             {
-                TA0CTL |= MC_2;
-                TA0IV &= ~TA0IV_TAIFG;
-                TA0CTL |= TAIE;
+                TA0CTL |= MC_2;TA0IV &= ~TA0IV_TAIFG;TA0CTL |= TAIE;P2IE |= ROTATION_PIN;
                 key2_diag_fallingOcured1 = false;
                 if (carLearnTimes < LEARNING_TIMES)
                 {
                     if ( !timeBetween2Key_3Key ) { timeBetween2Key_3Key+=tmpCounterForCalculateKeyTime; }
                     else { timeBetween2Key_3Key+=tmpCounterForCalculateKeyTime;timeBetween2Key_3Key/=2; }
                     carLearnTimes++;
-#ifdef debugMode == 1
+#if debugMode == 1
                     print("carLearnTimes: %d, %d\r\n",carLearnTimes,timeBetween2Key_3Key);
 #endif
                 }
@@ -186,9 +191,10 @@ __interrupt void port1_isr(void)
         }
         else //on faling
         {
-#ifdef debugMode == 1
+#if debugMode == 1
             print("Key3 OFF\r\n");
 #endif
+            P1IES &= ~KEY3_DIAG;
             if ( carLearn != Learn && key2_diag_fallingOcured2 )
             {
                 key2_diag_fallingOcured2 = false;
@@ -196,8 +202,8 @@ __interrupt void port1_isr(void)
                 if (carLearnTimes == LEARNING_TIMES)
                 {
                     carLearn = Learn;
-                    if ( (0xFFFF - (avgRotationSpeed/25)) >  avgRotationSpeed ) avgRotationSpeed = avgRotationSpeed + avgRotationSpeed/25;// add error 4%
-#ifdef debugMode == 1
+                    if ( (0xFFFF - (avgRotationSpeed/10)) >  avgRotationSpeed ) avgRotationSpeed = avgRotationSpeed + avgRotationSpeed/10;// add error 10%
+#if debugMode == 1
                     print("car learned with:%d rotation\r\n", avgRotationSpeed);
 #endif
                 }

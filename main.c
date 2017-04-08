@@ -33,8 +33,29 @@ void main(void)
         if ( (systemState == sleepMode) && (gprs_state_machine == GPRS_INIT) )
         {
             tmpValue = RxBuffer_Uart_Head;
-            if ( write_gprs_command("AT+CPOF\r\n","OK\r\n",10) || tmpValue == RxBuffer_Uart_Head ) go_to_sleep();//if not came any response or maybe in exact this time came any message
-            else { RxBuffer_Uart_Head =  tmpValue; systemState = wakeUpByTimerState;}
+            if ( write_gprs_command("AT+CPOF\r\n","OK",10) || tmpValue == RxBuffer_Uart_Head )
+            {
+#if debugMode == 1
+                if ( tmpValue == RxBuffer_Uart_Head )
+                {
+                    print("not came any response\r\n");
+                    while ( TxBuffer_Uart_Head != TxBuffer_Uart_Tail ) {}
+                }
+                else
+                {
+                    print("positive response\r\n");
+                    while ( TxBuffer_Uart_Head != TxBuffer_Uart_Tail ) {}
+                }
+#endif
+                go_to_sleep();//if not came any response or maybe in exact this time came any message
+            }
+            else
+            {
+                RxBuffer_Uart_Head =  tmpValue; systemState = wakeUpByTimerState;
+#if debugMode == 1
+                print("tmpValue |= RxBuffer_Uart_Head and negative response on AT+CPOF, maybe came message\r\n");
+#endif
+            }
         }
 
         if ( gprs_state_machine == GPRS_SLEEP ) powerON_GPRS();
@@ -65,6 +86,7 @@ void main(void)
                 case ventilator_4pozitie:  { activateVentilator(ventilator4);                   break; }
                 case ventilator_off:       { deactivateVentilator(ventilator3 + ventilator4);   break; }
                 case report:               { reportMethod();                                    break; }
+                case unlock_doors:         { unlock();                                          break; }
                 case delaySeconds:         { }
                 default:break;
                 }

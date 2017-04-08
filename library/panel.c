@@ -61,6 +61,9 @@ void activateVentilator(uint8 ventilatoorPozition)
         if ( statesOfVentilator & ventilatoorPozition ) counterExecutedCommands++;
         else
         {
+#if debugMode == 1
+                print("Activate ventilator\r\n");
+#endif
             P3OUT |= ventilatoorPozition;
             statesOfVentilator |= ventilatoorPozition;
             P3OUT &= ~(ventilator4+ventilator3-ventilatoorPozition);
@@ -72,6 +75,9 @@ void activateVentilator(uint8 ventilatoorPozition)
 }
 void deactivateVentilator(uint8 ventilatoorPozition)
 {
+#if debugMode == 1
+                print("Dectivate ventilator\r\n");
+#endif
     P3OUT &= ~ventilatoorPozition;
     statesOfVentilator &= ~ventilatoorPozition;
     counterExecutedCommands++;

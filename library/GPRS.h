@@ -50,14 +50,13 @@ enum CommandsBits
     ventilator_4pozitie,
     ventilator_off,
     report,
+    unlock_doors,
     delaySeconds,
     NrOfSMSComands
 };
 
 uint8 countForEachCommand[NrOfSMSComands];
 uint8 gprs_state_machine;
-uint8 gprs_second;
-uint8 gprs_minuts;
 uint8 PresentAnyCommand;
 bool  allCommandsExecuted;
 uint8 counterExecutedCommands;
