@@ -68,14 +68,14 @@ void startEngine()
         {
                 if ( KarStastes == KeysOffFailed && waitKeyTimer >= 10)
                {
-                   P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
+                   P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
 #if debugMode == 1
-                   print("activate key1 from KeysOffFail\r\n");
+                   print("activate key2 from KeysOffFail\r\n");
 #endif
                }
                else if ( KarStastes == KeysOff )
                {
-                   P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
+                   P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
 #if debugMode == 1
                    print("activate key1 from KeysOff\r\n");
 #endif
@@ -83,6 +83,7 @@ void startEngine()
                else if ( KarStastes == Key1on && waitKeyTimer >= 10 )
                {
                    P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
+                   P1OUT &= ~KEY1_ENABLE;
 #if debugMode == 1
                    print("activate key2\r\n");
 #endif
@@ -93,10 +94,10 @@ void startEngine()
 #if debugMode == 1
                    print("activate key3\r\n");
 #endif
-                   P1OUT &= ~KEY1_ENABLE;                                                           //deactivate key1 when start engine
                    OverRotationTimeValidation = OVER_ROTATION_TIME;avgRotationSpeedValidate = 0;
                    P1OUT |= KEY3_ENABLE;KarStastes = Key3on; waitKeyTimer =0;
-                   TA0CTL |= MC_2;TA0IV &= ~TA0IV_TAIFG;TA0CTL |= TAIE ;P2IE |= ROTATION_PIN;
+                   P2IE |= ROTATION_PIN;
+                   TA0CTL |= MC_2;TA0IV &= ~TA0IV_TAIFG;TA0CTL |= TAIE ;
                }
                else if ( KarStastes == Key3on && waitKeyTimer >= (holdKey3Time + HOLD_KEY3_MORE))
                {

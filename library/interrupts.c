@@ -202,7 +202,7 @@ __interrupt void port1_isr(void)
                 if (carLearnTimes == LEARNING_TIMES)
                 {
                     carLearn = Learn;
-                    if ( (0xFFFF - (avgRotationSpeed/10)) >  avgRotationSpeed ) avgRotationSpeed = avgRotationSpeed + avgRotationSpeed/10;// add error 4%
+                    if ( (0xFFFF - (avgRotationSpeed/5)) >  avgRotationSpeed ) avgRotationSpeed = avgRotationSpeed + avgRotationSpeed/5;// add error 20%
 #if debugMode == 1
                     print("car learned with:%d rotation\r\n", avgRotationSpeed);
 #endif
