@@ -68,14 +68,14 @@ void startEngine()
         {
                 if ( KarStastes == KeysOffFailed && waitKeyTimer >= 10)
                {
-                   P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
+                   P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
 #if debugMode == 1
-                   print("activate key2 from KeysOffFail\r\n");
+                   print("activate key1 from KeysOffFail\r\n");
 #endif
                }
                else if ( KarStastes == KeysOff )
                {
-                   P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
+                   P1OUT |= KEY1_ENABLE; KarStastes = Key1on;waitKeyTimer=0;
 #if debugMode == 1
                    print("activate key1 from KeysOff\r\n");
 #endif
@@ -83,7 +83,6 @@ void startEngine()
                else if ( KarStastes == Key1on && waitKeyTimer >= 10 )
                {
                    P1OUT |= KEY2_ENABLE; KarStastes = Key2on;waitKeyTimer=0;
-                   P1OUT &= ~KEY1_ENABLE;
 #if debugMode == 1
                    print("activate key2\r\n");
 #endif
@@ -112,7 +111,6 @@ void startEngine()
                {
                    counterExecutedCommands++; counter_StayActive_EngineStart = 0;
                    OverflowOcuredInEngineStarted = 0;P1OUT &= ~KEY3_ENABLE;
-                   P1OUT |= KEY1_ENABLE;
 #if debugMode == 1
                    print("engine started:%d\r\n",avgRotationSpeedValidate);
 #endif
