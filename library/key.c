@@ -160,8 +160,10 @@ void stopEngine()
     else if ( ((KarStastes == Key1on || KarStastes == key3fail2) &&  waitKeyTimer >= 10) || KarStastes == KeysOff )
     {
         KarStastes = KeysOff;P1OUT &= ~KEY1_ENABLE; counterExecutedCommands++;
+        deactivateVentilator(ventilator4 + ventilator3);counterExecutedCommands--;
+        deactivateFromPanel( AC + recirculare + parbriz + luneta );counterExecutedCommands--;
 #if debugMode == 1
-                print("Engine Stoped\r\n");
+        print("Engine Stoped\r\n");
 #endif
     }
     //else { P1OUT &= ~( KEY3_ENABLE + KEY2_ENABLE + KEY1_ENABLE ); KarStastes = KeysOff; counterExecutedCommands++; }//to be sure all keys off

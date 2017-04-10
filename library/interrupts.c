@@ -137,10 +137,10 @@ __interrupt void port1_isr(void)
 #if debugMode == 1
 	        print("Key2 ON\r\n");
 #endif
-	        deactivateparkingLight();
-            deactivateVentilator(ventilator4 + ventilator3);
-            P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
-            deactivateFromPanel(AC);deactivateFromPanel(recirculare);deactivateFromPanel(parbriz);deactivateFromPanel(luneta);
+	        P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
+	        deactivateparkingLight();counterExecutedCommands--;
+            deactivateVentilator(ventilator4 + ventilator3);counterExecutedCommands--;
+            deactivateFromPanel( AC + recirculare + parbriz + luneta );counterExecutedCommands--;
             retryersToStartEngine = 0;
 
             if ( carLearn == Learn ) { TA0CTL &= ~(MC_2 + TAIE);P2IE &= ~ROTATION_PIN; }
