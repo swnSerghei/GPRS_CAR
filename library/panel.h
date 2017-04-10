@@ -15,8 +15,8 @@
 #define recirculare BIT4
 #define parbriz BIT2
 #define luneta BIT6
-#define ventilator3 BIT0    //port3
-#define ventilator4 BIT2    //port3
+#define ventilator4 BIT0    //port3
+#define ventilator3 BIT2    //port3
 void activateFromPanel(uint8 activateWhat);
 void deactivateFromPanel(uint8 deactivateWhat);
 void activateVentilator(uint8 ventilatoorPozition);
