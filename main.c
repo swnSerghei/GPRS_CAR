@@ -28,7 +28,7 @@ void main(void)
     parkingLightInit();
     __enable_interrupt();
     go_to_sleep();
-    while(1)
+
     {
         if ( (systemState == sleepMode) && (gprs_state_machine == GPRS_INIT) )
         {
