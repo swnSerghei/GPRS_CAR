@@ -20,7 +20,9 @@ extern const uint8 *GPRSCommands[];
 #define INT_GPRS BIT2
 #define POWER_ON_BUTTON 25 //3 second
 #define timeToInvalidate 10 //1 seconds
-
+#define SizeOfMSG 140
+uint8 *SMScontent;
+uint8 SMScontent_Counter;
 
 
 enum gprs_state_machine
@@ -49,11 +51,20 @@ enum CommandsBits
     ventilator_3pozitie,
     ventilator_4pozitie,
     ventilator_off,
-    report,
     unlock_doors,
     delaySeconds,
+    //without verify who sender, directly verify if present any sms command =====> defined by howManyCommandsWithoutVerifySender
+    report,
+    gps_off,
+    gps_on,
+    gps_get,
+
     NrOfSMSComands
 };
+#define gps_get_From_Length 20
+uint8 *gps_get_From;
+uint8 gps_get_From_Counter;
+#define howManyCommandsWithoutVerifySender  4
 
 uint8 countForEachCommand[NrOfSMSComands];
 uint8 gprs_state_machine;
@@ -66,10 +77,17 @@ enum GPRS_commands
 {
     SMS=0,
     CALL,
+    GPS_STRING,
     totalGPRScomands
 };
 uint8 GPRSCommands_Counter[totalGPRScomands];
-
+enum GPS_action
+{
+    deactivate=0,
+    activate,
+    gps_send_via_sms,
+    total_GPS_action
+};
 enum listOFtelephonNumbers
 {
 tel1,
@@ -93,4 +111,5 @@ void init_GPRS_only_on_PowerOn();
 bool wait_gprs_response(uint8 *command,uint8 whaiteTime);
 void wait_gprs_loop(void);
 bool write_gprs_command(uint8 *command,uint8 *response,uint8 whaiteTime);
+void gprs(uint8 action);
 #endif /* LIBRARY_GPRS_H_ */

@@ -86,6 +86,9 @@ void main(void)
                 case ventilator_4pozitie:  { activateVentilator(ventilator4);                   break; }
                 case ventilator_off:       { deactivateVentilator(ventilator3 + ventilator4);   break; }
                 case report:               { reportMethod();                                    break; }
+                case gps_on:               { gprs(activate);                                    break; }
+                case gps_off:              { gprs(deactivate);                                  break; }
+                case gps_get:              { gprs(gps_send_via_sms);                            break; }
                 case unlock_doors:         { unlock();                                          break; }
                 case delaySeconds:         { }
                 default:break;
@@ -97,6 +100,9 @@ void main(void)
                 switch (listOfCommandsToExecuting[counterExecutedCommands])
                 {
                 case report:               { reportMethod();                                    break; }
+                case gps_on:               { gprs(activate);                                    break; }
+                case gps_off:              { gprs(deactivate);                                  break; }
+                case gps_send_via_sms:     { gprs(gps_send_via_sms);                            break; }
                 default:                   { counterExecutedCommands++;                         break; }
                 }
             }

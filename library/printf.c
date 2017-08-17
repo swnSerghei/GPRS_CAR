@@ -24,7 +24,7 @@ void print(uint8 *string, ... )
 	 {
 		 union Printable_t
 	 	 {
-		 uint16     i;
+		 uint16  i;
 		 float   f;
 		 char    c;
 		 char   *s;
@@ -50,8 +50,8 @@ void print(uint8 *string, ... )
 					else
 					{
 					    putInUartBuffer( (Printable.i / powValue)+48 );
-					Printable.i %= powValue;
-					powValue/=10;
+                        Printable.i %= powValue;
+                        powValue/=10;
 					}
 					countIntegerNumber--;
 				}
@@ -97,6 +97,11 @@ void print(uint8 *string, ... )
 
 			 case 's':
 				 Printable.s = va_arg( vl, char * );
+				 while ( *Printable.s != '\0')
+				 {
+				     putInUartBuffer( *Printable.s );
+				     Printable.s++;
+				 }
 				// printf_s( "%s\n", Printable.s );
 			 break;
 			 default:

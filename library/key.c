@@ -43,7 +43,9 @@ bool shifterState()
 }
 void reportMethod()
 {
-       write_gprs_command("AT+CMGS=\"0757294327\"\r\n",">\r\n",10);
+       //write_gprs_command("AT+CMGS=\"0040757294327\"\r\n",">\r\n",10);
+       print("AT+CMGS=\"%s\"\r\n",gps_get_From);
+       wait_gprs_response(">\r\n",10);
        wait_gprs_response("bla",10);                                             //only for whaite 1 seconds
        print("Learn:%d from %d\r\n",carLearnTimes,LEARNING_TIMES);
        print("AVGrot:%d\r\n",avgRotationSpeed);

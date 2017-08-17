@@ -24,22 +24,26 @@ const uint8 *SMSCommands[]=
     {"ventilator_3pozitie"},
     {"ventilator_4pozitie"},
     {"ventilator_off"},
-    {"report"},
     {"unlock_doors"},
-    {"delaySeconds"}
+    {"delaySeconds"},
+    //without verify who sender, directly verify if present any sms command =====> defined by howManyCommandsWithoutVerifySender
+    {"report"},
+    {"gps_off"},
+    {"gps_on"},
+    {"gps_get"},
 };
 
 const uint8 *GPRSCommands[]=
 {
-    {"+CMT: \"+"},
-    {"RING"}
+    {"+CMT: \""},
+    {"RING"},
+    {"GPRMC"}
 };
-
 
 uint8 *telephonNumbers[]=
 {
- {"40757294327"},
- {"37379548801"}
+ {"+40757294327"},
+ {"+37379548801"}
 };
 void init_GPRS_only_on_PowerOn()
 {
@@ -48,6 +52,7 @@ void init_GPRS_only_on_PowerOn()
     PresentAnyCommand = false;
     counterHowManyCommands=0;
     counterExecutedCommands=0;
+    gps_get_From_Counter=0;
     for (i=0;i<NrOfSMSComands;i++)
     {
         listOfCommandsToExecuting[i] = 0;
@@ -113,15 +118,36 @@ void wait_gprs_loop()
                       if ( i == SMS )
                       {
                           GPRSCommands_Counter[i]=0;whaitTimer = 0; PresentAnyCommand = true; topologyCheck = readTelephonNumber;
+                          gps_get_From-=gps_get_From_Counter;
+                          gps_get_From_Counter = 0;
+                          *gps_get_From = '\0';
 #if debugMode == 1
                           print("Present SMS command\r\n");
 #endif
                       }
-                      else if ( i == CALL ) {GPRSCommands_Counter[i]=0;write_gprs_command("ATH\r\n","OK\r\n",1);}
+                      else if ( i == CALL )
+                      {
+                          GPRSCommands_Counter[i]=0;write_gprs_command("ATH\r\n","OK\r\n",1);
+                      }
+                      else if ( i == GPS_STRING )
+                      {
+                          whaitTimer = 0;
+                          if( *SMScontent != '\0' ) SMScontent-=SMScontent_Counter;
+                          SMScontent_Counter=0;
+                          while (whaitTimer <= 10 && RxBuffer_Uart[RxBuffer_Uart_Head] != '\n' && SMScontent_Counter < SizeOfMSG )//1 second wait string
+                          {
+                              if ( RxBuffer_Uart_Tail !=  RxBuffer_Uart_Head )
+                              {
+                                  *SMScontent = RxBuffer_Uart[RxBuffer_Uart_Head];
+                                  SMScontent++;
+                              }
+                          }
+                          GPRSCommands_Counter[i]=0;
+                      }
                     }
                 }
                 else GPRSCommands_Counter[i] = 0;
-           }
+                }
        }
        else if (topologyCheck == readTelephonNumber)
        {
@@ -140,6 +166,31 @@ void wait_gprs_loop()
                        }
                    }
                    else telephonNumbers_Counter[j] = 0;
+                   if ( *gps_get_From != '\"' )
+                   {
+                       *gps_get_From = RxBuffer_Uart[RxBuffer_Uart_Head];
+                       gps_get_From++;gps_get_From_Counter++;
+                       if ( gps_get_From_Counter == gps_get_From_Length ) {gps_get_From-=gps_get_From_Counter;gps_get_From_Counter=0;}
+                   }
+                   else
+                   {
+                       for ( k=(NrOfSMSComands - howManyCommandsWithoutVerifySender);k < NrOfSMSComands; k++ )
+                      {
+                         if ( RxBuffer_Uart[RxBuffer_Uart_Head] == SMSCommands[k][countForEachCommand[k]] )
+                         {
+                             countForEachCommand[k]++;
+                             if (SMSCommands[k][countForEachCommand[k]] == '\0')
+                             {
+                                 listOfCommandsToExecuting[counterHowManyCommands] = k; counterHowManyCommands++; allCommandsExecuted = false; countForEachCommand[k]=0;
+
+                    #if debugMode == 1
+                                 print("Present command from\r\n");
+                    #endif
+                             }
+                         }
+                         else countForEachCommand[k] = 0;
+                      }
+                   }
                }
        }
        else if ( topologyCheck == readSMScontent )
@@ -178,11 +229,39 @@ void wait_gprs_loop()
 }
 bool write_gprs_command(uint8 *command,uint8 *response,uint8 whaiteTime)
 {
-    uint8 i;
-    for(i = 0; command[i] != '\0'; ++i )
+    while ( *command != '\0' )
     {
-        putInUartBuffer(command[i]);
+        putInUartBuffer(*command);
+        command++;
     }
     if ( wait_gprs_response(response,whaiteTime) )return 1;
     else return 0;
+}
+void gprs(uint8 action)
+{
+    if ( action == activate )
+    {
+        write_gprs_command("AT+GPSRD=10","OK",10);//NEMA information N seconds output ONE time by AT serial port, actual use of n into numbers
+        write_gprs_command("AT+GPS=1","OK",10);//open GPS
+        write_gprs_command("AT+AGPS=1","OK",10);//After you open the GPS/AGPS, default information from NEMA GPS_TXD output pins with a 9600 baud rate, if make NEMA output by AT serial port,can be used AT +GPSRD.
+    }
+    else if ( action == deactivate )
+    {
+        if ( write_gprs_command("AT+GPS=0","OK",10) == 0 || write_gprs_command("AT+AGPS=0","OK",10) )
+        {
+            write_gprs_command("AT+GPS=0","OK",10);
+            write_gprs_command("AT+AGPS=0","OK",10);
+        }
+    }
+    else if ( action == gps_send_via_sms )
+    {
+        //write_gprs_command("AT+CMGS=\"0040757294327\"\r\n",">\r\n",10);
+        print("AT+CMGS=\"%s\"\r\n",gps_get_From);
+        wait_gprs_response(">\r\n",10);
+        wait_gprs_response("bla",10);                                             //only for whaite 1 seconds
+        print(SMScontent);
+        putInUartBuffer(26);//ctrl+z
+        wait_gprs_response("OK",10);
+        counterExecutedCommands++;
+    }
 }
