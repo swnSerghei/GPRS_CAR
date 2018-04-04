@@ -1,4 +1,4 @@
-#include <msp430g2955.h>
+#include <msp430g2553.h>
 #include "library/printf.h"
 #include "library/uart.h"
 #include "library/interrupts.h"
@@ -24,7 +24,7 @@ void main(void)
     initTimerOnlyOnPowerOn();
     init_GPRS_only_on_PowerOn();
     keyPosition_init();
-    initPanel();
+    //initPanel();
     parkingLightInit();
     __enable_interrupt();
     go_to_sleep();
@@ -123,12 +123,12 @@ void portsOFF()
     P2DIR = 0;
     P2SEL = 0;
     P2SEL2= 0;
-    P3OUT = 0;
-    P3DIR = 0;
-    P3SEL = 0;
-    P3SEL2= 0;
-    P4OUT = 0;
-    P4DIR = 0;
-    P4SEL = 0;
-    P4SEL2= 0;
+//    P3OUT = 0;
+//    P3DIR = 0;
+//    P3SEL = 0;
+//    P3SEL2= 0;
+//    P4OUT = 0;
+//    P4DIR = 0;
+//    P4SEL = 0;
+//    P4SEL2= 0;
 }

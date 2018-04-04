@@ -14,16 +14,17 @@
 #include "parkingLight.h"
 #include "interrupts.h"
 
-#define KEY1_ENABLE BIT0
-#define KEY2_ENABLE BIT1
-#define KEY2_DIAG   BIT2
-#define KEY3_ENABLE BIT3
-#define KEY3_DIAG   BIT4
+#define KEY1_ENABLE BIT2
+#define KEY2_ENABLE BIT0
+#define KEY2_DIAG   BIT7
+#define KEY3_ENABLE BIT5
+#define KEY3_DIAG   BIT6
 #define STOPENGINEAFTER_X_TIMES_OVERFLOWS 20
 
-#define PARKING_BRAKE   BIT1    //PORT 3    OK-high
-#define SHIFTER         BIT3    //PORT 3    OK-high
-#define ROTATION_PIN    BIT3    //port 2
+#define PARKING_BRAKE   BIT5    //PORT x    OK-high
+#define SHIFTER         BIT4    //PORT x    OK-high
+#define ROTATION_PIN    BIT1    //port x
+
 #define SLEEP_PERIODIC_AFTER 24
 #define StayActive_EngineStart 20       //20min maximum 255 minute
 uint8 counter_StayActive_EngineStart;

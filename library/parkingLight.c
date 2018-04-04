@@ -7,7 +7,7 @@
 #include "parkingLight.h"
 void parkingLightInit()
 {
-    P4DIR |= parkingLightPin;
+    P1DIR |= parkingLightPin;
     parkingLightState = false;
 }
 void activateparkingLight()
@@ -18,7 +18,7 @@ void activateparkingLight()
 #if debugMode == 1
                 print("Activate Parking Light\r\n");
 #endif
-        P4OUT |= parkingLightPin;
+        P1OUT |= parkingLightPin;
         counter_StayActive_ParckingLight = 0;
         parkingLightState |= true;
         //print("parkingLight_start\r\n");
@@ -26,7 +26,7 @@ void activateparkingLight()
 }
 void deactivateparkingLight()
 {
-        P4OUT &= ~parkingLightPin;
+        P1OUT &= ~parkingLightPin;
         parkingLightState = false;
         counterExecutedCommands++;
 #if debugMode == 1

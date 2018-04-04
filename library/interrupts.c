@@ -128,16 +128,19 @@ __interrupt void Timer1_A1 (void)
 #pragma vector = PORT1_VECTOR
 __interrupt void port1_isr(void)
 {
-	if ( P1IFG & KEY2_DIAG ) //on rising
+	if ( P2IFG & KEY2_DIAG ) //on rising
 	{
-	    if (P1IN & KEY2_DIAG)
+	    if (P2IN & KEY2_DIAG)
 	    {
 	        NotActiveTime = 0;
 	        if (systemState == sleepMode) { wakeUp(); LPM1_EXIT; wakeupTimer = WAKEUP_AFTER_X_SECONDS; }
 #if debugMode == 1
 	        print("Key2 ON\r\n");
 #endif
-	        P1OUT &= ~( KEY1_ENABLE+ KEY2_ENABLE  + KEY3_ENABLE ); KarStastes = KeysOff;
+	        P2OUT &= ~( KEY1_ENABLE + KEY2_ENABLE );
+	        P1OUT &= ~( KEY3_ENABLE );
+	        KarStastes = KeysOff;
+
 	        deactivateparkingLight();counterExecutedCommands--;
             deactivateVentilator(ventilator4 + ventilator3);counterExecutedCommands--;
             deactivateFromPanel( AC + recirculare + parbriz + luneta );counterExecutedCommands--;
@@ -148,7 +151,7 @@ __interrupt void port1_isr(void)
             tmpCounterForCalculateKeyTime = 0;
             systemState = wakeUpByKey2State;
 
-            P1IES |= KEY2_DIAG;
+            P2IES |= KEY2_DIAG;
 	    }
         else//on faling
         {
@@ -159,15 +162,15 @@ __interrupt void port1_isr(void)
             key2_diag_fallingOcured2 = true;
             systemState = wakeUpByTimerState;
 
-            P1IES &= ~KEY2_DIAG;
+            P2IES &= ~KEY2_DIAG;
         }
-	    P1IFG &= ~KEY2_DIAG;
+	    P2IFG &= ~KEY2_DIAG;
 	}
 
-	if (P1IFG & KEY3_DIAG)
+	if (P2IFG & KEY3_DIAG)
     {
 
-        if ( P1IN & KEY3_DIAG )//on rising
+        if ( P2IN & KEY3_DIAG )//on rising
         {
 #if debugMode == 1
             print("Key3 ON\r\n");
@@ -187,14 +190,14 @@ __interrupt void port1_isr(void)
 #endif
                 }
             }
-            P1IES |= KEY3_DIAG;
+            P2IES |= KEY3_DIAG;
         }
         else //on faling
         {
 #if debugMode == 1
             print("Key3 OFF\r\n");
 #endif
-            P1IES &= ~KEY3_DIAG;
+            P2IES &= ~KEY3_DIAG;
             if ( carLearn != Learn && key2_diag_fallingOcured2 )
             {
                 key2_diag_fallingOcured2 = false;
@@ -211,7 +214,7 @@ __interrupt void port1_isr(void)
                 else holdKey3Time += tmpKey3Time;
             }
         }
-        P1IFG &= ~KEY3_DIAG;
+        P2IFG &= ~KEY3_DIAG;
     }
     __enable_interrupt();
 }

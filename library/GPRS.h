@@ -15,9 +15,10 @@
 #include "printf.h"
 extern const uint8 *SMSCommands[];
 extern const uint8 *GPRSCommands[];
-#define PWR_GPRS BIT0
-#define RST_GPRS BIT1
-#define INT_GPRS BIT2
+#define PWR_GPRS BIT3
+#define RST_GPRS BIT0
+#define RTS_GPRS BIT7   //RTS from GPS
+#define CTS_GPRS BIT3   //CTS from GPS
 #define POWER_ON_BUTTON 25 //3 second
 #define timeToInvalidate 10 //1 seconds
 #define SizeOfMSG 141       //last element is '\0', but message is 140

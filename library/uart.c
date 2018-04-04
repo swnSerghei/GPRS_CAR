@@ -22,7 +22,7 @@ Clock           Baudrate        UCBRx       UCBRSx      UCBRFx  UCOS16 = 1
 */
 void Init_Uart()
 {
-	P3SEL  |=   RXD + TXD ; // P3.4 = RXD, P3.5=TXD
+	P1SEL  |=   RXD + TXD ; // P3.4 = RXD, P3.5=TXD
 	UCA0CTL1 |= UCSWRST;                      			// Enable SW reset
 	UCA0CTL1 |= UCSSEL_2; // SMCLK
 	UCA0BR0 = 17; // 4MHz
@@ -42,7 +42,7 @@ void Init_Uart()
 }
 void uninit_uart()
 {
-    P3SEL   &= ~( RXD + TXD ) ; // P3.4 = RXD, P3.5=TXD
+    P1SEL   &= ~( RXD + TXD ) ; // P3.4 = RXD, P3.5=TXD
 //    IFG2    &= ~UCA0TXIFG;
 //    IFG2    &= ~UCA0RXIFG;
     UC0IE   &= ~UCA0RXIE; // Enable USCI_A0 RX interrupt

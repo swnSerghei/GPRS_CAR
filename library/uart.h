@@ -10,10 +10,10 @@
 #include <msp430.h>
 #include "commontypes.h"
 
-#define RXD BIT5
-#define TXD BIT4
+#define RXD BIT1
+#define TXD BIT2
 
-#define SizeOfBuffer 255
+#define SizeOfBuffer 50
 uint8 TxBuffer_Uart[SizeOfBuffer];
 uint16 TxBuffer_Uart_Head;
 uint16 TxBuffer_Uart_Tail;

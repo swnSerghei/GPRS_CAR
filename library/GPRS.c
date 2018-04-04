@@ -48,7 +48,7 @@ uint8 *telephonNumbers[]=
 void init_GPRS_only_on_PowerOn()
 {
     uint8 i;
-    P4DIR |= PWR_GPRS;
+    P1DIR |= PWR_GPRS;
     PresentAnyCommand = false;
     counterHowManyCommands=0;
     counterExecutedCommands=0;
@@ -61,9 +61,9 @@ void init_GPRS_only_on_PowerOn()
 void powerON_GPRS()
 {
     //print("Activate pin: %d, %d, %d \r\n",seconds,minuts,hours);
-    P4OUT |= PWR_GPRS;
+    P1OUT |= PWR_GPRS;
     whaitTimer=0;while (whaitTimer < POWER_ON_BUTTON){}
-    P4OUT &= ~PWR_GPRS;
+    P1OUT &= ~PWR_GPRS;
     wait_gprs_response("CINIT:",60);                     //whaite CREG
     wait_gprs_response("CINIT:",60);                     //whaite CREG
     wait_gprs_response("bla",10);                                             //only for whaite 1 seconds
@@ -235,6 +235,7 @@ bool write_gprs_command(uint8 *command,uint8 *response,uint8 whaiteTime)
 {
     while ( *command != '\0' )
     {
+
         putInUartBuffer(*command);
         command++;
     }

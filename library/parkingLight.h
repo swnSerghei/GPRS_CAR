@@ -11,7 +11,7 @@
 #include "library/commontypes.h"
 #include "GPRS.h"
 
-#define parkingLightPin BIT7
+#define parkingLightPin BIT4
 #define StayActive_ParckingLight 360    //6h - 6 * 60
 uint16 counter_StayActive_ParckingLight;
 bool parkingLightState;

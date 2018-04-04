@@ -9,10 +9,13 @@
 
 void keyPosition_init()
 {
-    P1DIR |=   KEY1_ENABLE + KEY2_ENABLE + KEY3_ENABLE;
+    P1DIR |= KEY3_ENABLE;
+    P2DIR |= KEY1_ENABLE + KEY2_ENABLE;
+
     P1IES &= ~(KEY2_DIAG + KEY3_DIAG);
-    P1IFG &= ~(KEY2_DIAG + KEY3_DIAG);
-    P1IE   =   KEY2_DIAG + KEY3_DIAG;
+
+    P2IFG &= ~(KEY2_DIAG + KEY3_DIAG);
+    P2IE   =   KEY2_DIAG + KEY3_DIAG;
     carLearn = NotLearn;
     carLearnTimes = 0;
     timeBetween2Key_3Key = 0;
@@ -26,8 +29,8 @@ void keyPosition_init()
     P2IFG &= ~ROTATION_PIN;
     avgRotationSpeed = 0;
     OverFlowOcured = 0;
-    P3OUT |= SHIFTER; //The pin is pulled up
-    P3REN |= SHIFTER; //Pullup/pulldown resistor enabled
+    P2OUT |= SHIFTER; //The pin is pulled up
+    P2REN |= SHIFTER; //Pullup/pulldown resistor enabled
 }
 bool parkingState()
 {
