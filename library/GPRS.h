@@ -20,10 +20,10 @@ extern const uint8 *GPRSCommands[];
 #define INT_GPRS BIT2
 #define POWER_ON_BUTTON 25 //3 second
 #define timeToInvalidate 10 //1 seconds
-#define SizeOfMSG 140
-uint8 *SMScontent;
+#define SizeOfMSG 141       //last element is '\0', but message is 140
+uint8 SMScontent[SizeOfMSG];
 uint8 SMScontent_Counter;
-
+bool telephone_complete;
 
 enum gprs_state_machine
 {
@@ -61,8 +61,8 @@ enum CommandsBits
 
     NrOfSMSComands
 };
-#define gps_get_From_Length 20
-uint8 *gps_get_From;
+#define gps_get_From_Length 21 //last value is '\0'
+uint8 gps_get_From[gps_get_From_Length];
 uint8 gps_get_From_Counter;
 #define howManyCommandsWithoutVerifySender  4
 

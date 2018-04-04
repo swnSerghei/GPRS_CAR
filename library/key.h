@@ -22,7 +22,7 @@
 #define STOPENGINEAFTER_X_TIMES_OVERFLOWS 20
 
 #define PARKING_BRAKE   BIT1    //PORT 3    OK-high
-#define SHIFTER         BIT3    //PORT 3    OK-low
+#define SHIFTER         BIT3    //PORT 3    OK-high
 #define ROTATION_PIN    BIT3    //port 2
 #define SLEEP_PERIODIC_AFTER 24
 #define StayActive_EngineStart 20       //20min maximum 255 minute

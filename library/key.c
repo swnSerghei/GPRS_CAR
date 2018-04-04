@@ -26,6 +26,8 @@ void keyPosition_init()
     P2IFG &= ~ROTATION_PIN;
     avgRotationSpeed = 0;
     OverFlowOcured = 0;
+    P3OUT |= SHIFTER; //The pin is pulled up
+    P3REN |= SHIFTER; //Pullup/pulldown resistor enabled
 }
 bool parkingState()
 {
@@ -37,8 +39,8 @@ bool parkingState()
 bool shifterState()
 {
     volatile bool returnTmpValue = P3IN & SHIFTER;
-    if (returnTmpValue == SHIFTER) returnTmpValue = 0;
-    else returnTmpValue = 1;
+    if (returnTmpValue == SHIFTER) returnTmpValue = 1;
+    else returnTmpValue = 0;
     return returnTmpValue;
 }
 void reportMethod()

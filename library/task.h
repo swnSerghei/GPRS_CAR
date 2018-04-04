@@ -14,7 +14,7 @@
 #include "key.h"
 #include "interrupts.h"
 #include "GPRS.h"
-#define WAKEUP_AFTER_X_SECONDS 120
+#define WAKEUP_AFTER_X_SECONDS 30
 #define STAY_AWAKE 120
 uint8 systemState;
 
